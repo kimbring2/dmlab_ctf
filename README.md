@@ -1,4 +1,8 @@
-Implementation of Capture the Flag: the emergence of complex cooperative agents of DeepMind
+# Introduction
+Implementation of Capture the Flag: the emergence of complex cooperative agents of DeepMind. I first describe how to set the DeepMind lab for running the Capture The Flag map. Next, I also add a way how to desing your own simple CTF map. Finally, I am going to train the agent for Capture the Flag game in 1 vs 1 case. The scale of network will be little small than original paper. However, you can know a basic knowleade how to build the agent for CTF game.
+
+# Version
+1. Python 3.8
 
 # Demo video 
 To make everything simple, I first make a Capture the Flag map for 1 vs 1 situation without any item and obstable.
