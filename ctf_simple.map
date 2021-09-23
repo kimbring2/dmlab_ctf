@@ -1,0 +1,105 @@
+// entity 0
+{
+"classname" "worldspawn"
+// brush 0
+{
+( -1280 664 8 ) ( -1280 360 8 ) ( -1280 360 0 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+( -920 664 8 ) ( -1280 664 8 ) ( -1280 664 0 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+( 1256 -672 8 ) ( 1256 -368 8 ) ( 1256 -368 0 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+( 896 -672 8 ) ( 1256 -672 8 ) ( 1256 -672 0 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+( -1280 360 8 ) ( -1280 664 8 ) ( -920 664 8 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+( -920 664 0 ) ( -1280 664 0 ) ( -1280 360 0 ) map/lab_games/lg_style_01_floor_orange 0 0 0 0.190000 0.190000 0 0 0
+}
+// brush 1
+{
+( 1216 656 64 ) ( 1216 -664 64 ) ( 1216 -664 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 664 56 ) ( 1216 664 56 ) ( 1216 664 0 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 -656 56 ) ( 1256 664 56 ) ( 1256 664 0 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1216 -672 64 ) ( 1256 -672 64 ) ( 1256 -672 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1216 -656 272 ) ( 1216 664 272 ) ( 1256 664 272 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 656 8 ) ( 1216 656 8 ) ( 1216 -664 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+}
+// brush 2
+{
+( -1280 672 272 ) ( -1280 632 272 ) ( -1280 632 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 664 272 ) ( -1272 664 272 ) ( -1272 664 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 624 272 ) ( 1256 664 272 ) ( 1256 664 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1272 616 272 ) ( 1256 616 272 ) ( 1256 616 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1272 624 272 ) ( -1272 664 272 ) ( 1256 664 272 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 664 8 ) ( -1272 664 8 ) ( -1272 624 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+}
+// brush 3
+{
+( -1280 -648 272 ) ( -1280 -672 272 ) ( -1280 -672 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 -648 272 ) ( -1280 -648 272 ) ( -1280 -648 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 -672 272 ) ( 1256 -648 272 ) ( 1256 -648 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1280 -672 272 ) ( 1256 -672 272 ) ( 1256 -672 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1280 -672 272 ) ( -1280 -648 272 ) ( 1256 -648 272 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( 1256 -648 8 ) ( -1280 -648 8 ) ( -1280 -672 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+}
+// brush 4
+{
+( -1280 656 272 ) ( -1280 -656 272 ) ( -1280 -656 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1208 656 272 ) ( -1280 656 272 ) ( -1280 656 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1208 -656 272 ) ( -1208 656 272 ) ( -1208 656 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1288 -664 272 ) ( -1216 -664 272 ) ( -1216 -664 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1280 -656 272 ) ( -1280 656 272 ) ( -1208 656 272 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+( -1208 656 8 ) ( -1280 656 8 ) ( -1280 -656 8 ) map/lab_games/lg_style_01_wall_blue 4 512 0 -0.001953 0.500000 0 0 0
+}
+// brush 5
+{
+( -1280 664 272 ) ( -1280 -648 272 ) ( -1280 -648 216 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+( 1256 664 272 ) ( -1280 664 272 ) ( -1280 664 216 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+( 1256 -648 272 ) ( 1256 664 272 ) ( 1256 664 216 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+( -1280 -656 272 ) ( 1256 -656 272 ) ( 1256 -656 216 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+( -1280 -648 272 ) ( -1280 664 272 ) ( 1256 664 272 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+( 1256 664 216 ) ( -1280 664 216 ) ( -1280 -648 216 ) map/lab_games/sky/lg_sky_02_dn 756 485 0 -0.507812 0.460938 0 0 0
+}
+}
+// entity 1
+{
+"origin" "-448 496 56"
+"classname" "team_CTF_blueplayer"
+}
+// entity 2
+{
+"origin" "176 -32 32"
+"classname" "info_player_intermission"
+}
+// entity 3
+{
+"origin" "880 88 32"
+"classname" "team_CTF_redflag"
+}
+// entity 4
+{
+"origin" "880 352 56"
+"classname" "team_CTF_redplayer"
+}
+// entity 5
+{
+"origin" "880 -280 72"
+"classname" "team_CTF_redspawn"
+}
+// entity 6
+{
+"origin" "-440 -176 48"
+"classname" "team_CTF_bluespawn"
+}
+// entity 7
+{
+"origin" "-424 48 32"
+"classname" "team_CTF_blueflag"
+}
+// entity 8
+{
+"light" "10000"
+"origin" "496 48 88"
+"classname" "light"
+}
+// entity 9
+{
+"light" "10000"
+"origin" "-528 -40 112"
+"classname" "light"
+}
