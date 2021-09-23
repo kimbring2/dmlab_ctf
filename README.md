@@ -25,3 +25,6 @@ Next, we will run same map as Python script. You
 2. Second, open [dmlab_test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/dmlab_test.ipynb) file.
 3. Third, check that you can import DmLab using 'import deepmind_lab' code.
 4. Finally, run entire Jupyter Notebook code.
+
+# How to customize map
+<img src="image/gtk_radiant_sample.png" width="1000">
