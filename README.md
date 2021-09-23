@@ -41,6 +41,9 @@ If you finish designing map and make a map format file, you should convert it to
 
 In my case, I use a command 'sudo ./compile_map_test.sh -a -m /home/kimbring2/GtkRadiant/test.map' for conversion. Please beware there is no gap in your map. That will make error named the leaked.
 
+# Lua script
+You also need to prepare a Lua script for running map file with DmLab. Tutorial for that can be found at [minimal_level_tutorial](https://github.com/deepmind/lab/blob/master/docs/developers/minimal_level_tutorial.md). The only important thing is setting the game type as CAPTURE_THE_FLAG. 
+
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
 2. CTF map design tip: https://www.quake3world.com/forum/viewtopic.php?f=10&t=51042
