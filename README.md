@@ -26,7 +26,7 @@ At first, we are going run the Capture The Flag map as human playing mode. Try t
 Next, we will run same map as Python script. You
 
 1. First, you need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md.
-2. Second, open [dmlab_test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/dmlab_test.ipynb) file.
+2. Second, open [DMLab_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_Test.ipynb) file.
 3. Third, check that you can import DmLab using 'import deepmind_lab' code.
 4. Finally, run entire Jupyter Notebook code.
 
@@ -43,6 +43,9 @@ In my case, I use a command 'sudo ./compile_map_test.sh -a -m /home/kimbring2/Gt
 
 # Lua script
 You also need to prepare a Lua script for running map file with DmLab. Tutorial for that can be found at [minimal_level_tutorial](https://github.com/deepmind/lab/blob/master/docs/developers/minimal_level_tutorial.md). The only important thing is setting the game type as CAPTURE_THE_FLAG. 
+
+# Training agent
+You can train the agent using [Jupyter Notebook of PPO agent](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_PPO_TF2.ipynb) at simple CTF game of above. 
 
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
