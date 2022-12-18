@@ -26,9 +26,11 @@ At first, we are going run the Capture The Flag map as human playing mode. Try t
 Next, we will run same map as Python script. You
 
 1. First, you need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md.
-2. Second, open [DMLab_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_Test.ipynb) file.
-3. Third, check that you can import DmLab using 'import deepmind_lab' code.
-4. Finally, run entire Jupyter Notebook code.
+2. After installing the whl file that is generated from first step, you need to copy the ctf_simple.lua file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the ctf_simple_factory.lua file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the ctf_simple.aas and ctf_simple.bsp file under 
+'deepmind_lab/baselab/maps' folder.
+3. Second, open [DMLab_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_Test.ipynb) file.
+4. Third, check that you can import DmLab using 'import deepmind_lab' code.
+5. Finally, run entire Jupyter Notebook code.
 
 # How to customize map
 You can design your own map using program called GtkRadiant. I also make the ctf_simple map like a below image.
