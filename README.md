@@ -5,7 +5,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 1. Python 3.8
 
 # Demo video 
-## To make everything simple, Capture the Flag map is made for the 1 vs 1 game without any item and obstacle.
+## 1. To make everything simple, Capture the Flag map is made for the 1 vs 1 game without any item and obstacle.
 
 [![1 vs 1 game demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
  "Capture The Flag Implementation - Click to Watch!")
@@ -13,7 +13,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 
 In this game, agent can grab the opponent flag if it reach to it closely. And then, agent can obtain 1 score if it brings opponent flag to home base.
 
-## There is also map for the 3 vs 3 game that is provided from the DeepMind Lab
+## 2. There is also map for the 3 vs 3 game that is provided from the DeepMind Lab
 
 [![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
  "Capture The Flag Implementation - Click to Watch!")
