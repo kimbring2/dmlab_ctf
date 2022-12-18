@@ -13,7 +13,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 
 In this game, agent can grab the opponent flag if it reach to it closely. And then, agent can obtain 1 score if it brings opponent flag to home base.
 
-## There is also map for the 3 vs 3 game that is provided from the DeepMind Lab.
+## There is also map for the 3 vs 3 game that is provided from the DeepMind Lab
 
 [![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
  "Capture The Flag Implementation - Click to Watch!")
