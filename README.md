@@ -5,17 +5,15 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 1. Python 3.8
 
 # Demo video 
-## 1:1 
-To make everything simple, I first make a Capture the Flag map for 1 vs 1 situation without any item and obstable.
+## 1:1 - To make everything simple, I first make a Capture the Flag map for 1 vs 1 situation without any item and obstable.
 
-[![1 vs 1 game demo](https://img.youtube.com/vi/88dNnX357eY/sddefault.jpg)](https://youtu.be/88dNnX357eY
+[![1 vs 1 game demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
 In this game, agent can grab the opponent flag if it reach to it closely. And then, agent can obtain 1 score if it brings opponent flag to home base.
 
-## 3:3
-There is also map for 3:3 game that is provided from the DeepMind Lab.
+## 3:3 - There is also map for 3:3 game that is provided from the DeepMind Lab.
 
 [![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
  "Capture The Flag Implementation - Click to Watch!")
@@ -36,9 +34,10 @@ Next, we will run same map as Python script. You
 1. First, you need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md.
 2. After installing the whl file that is generated from first step, you need to copy the [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file under 
 'deepmind_lab/baselab/maps' folder.
-3. Second, open [DMLab_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_Test.ipynb) file.
+3. Second, open [CTF_Single_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/CTF_Single_Test.ipynb) file.
 4. Third, check that you can import DmLab using 'import deepmind_lab' code.
 5. Finally, run entire Jupyter Notebook code.
+6. You can also test the 3:3 environment after copying the [ctf_multi_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi_factory.lua), and [ctf_multi.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi.lua) file to same place of single game. After copying them, open [CTF_Multi_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/CTF_Multi_Test.ipynb) file to check.
 
 # How to customize map
 You can design your own map using program called GtkRadiant. I also make the ctf_simple map like a below image.
