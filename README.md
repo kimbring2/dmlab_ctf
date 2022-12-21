@@ -56,7 +56,11 @@ In my case, I use a command 'sudo ./compile_map_test.sh -a -m /home/kimbring2/Gt
 You also need to prepare a Lua script for running map file with DmLab. Tutorial for that can be found at [minimal_level_tutorial](https://github.com/deepmind/lab/blob/master/docs/developers/minimal_level_tutorial.md). The only important thing is setting the game type as CAPTURE_THE_FLAG. 
 
 # Training agent
-You can train the agent using [Jupyter Notebook of PPO agent](https://github.com/kimbring2/dmlab_ctf/blob/main/DMLab_PPO_TF2.ipynb) at simple CTF game of above. 
+You can train the agent using below command.
+
+```
+$ ./run_reinforcement_learning.sh [number of envs] [gpu use] [pretrained model]
+```
 
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
