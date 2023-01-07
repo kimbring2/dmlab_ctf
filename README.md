@@ -52,6 +52,13 @@ For that, you need to install three program mentioned in https://github.com/deep
 
 If you finish designing map and make a map format file, you should convert it to binary format called the bsp, aas. The DeepMind also provides [tool for that](https://github.com/deepmind/lab/blob/master/deepmind/level_generation/compile_map.sh).
 
+Before runnthing that script, you need to modify the Q3MP, and BSPC path of that file according to your folder structrue. Below is example of my workspace.
+
+```
+readonly Q3MP="/home/kimbring2/GtkRadiant/install/q3map2"
+readonly BSPC="/home/kimbring2/lab/deepmind/level_generation/bspc/bspc"
+```
+
 In my case, I use a command 'sudo ./compile_map_test.sh -a -m /home/kimbring2/GtkRadiant/test.map' for conversion. Please beware there is no gap in your map. That will make error named the leaked.
 
 # Lua script
