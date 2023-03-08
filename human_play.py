@@ -64,12 +64,13 @@ if __name__ == '__main__':
 			mouse_move = (0, 0)
 			keyboard_move = [0, 0, 0, 0]
 			weapon_fire = 0
+			jump = 0
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					exit = True
 
 				if event.type == pygame.MOUSEMOTION:
-					mouse_move = event.rel 
+					mouse_move = event.rel
 
 				left, middle, right = pygame.mouse.get_pressed()
 				if left:
@@ -78,6 +79,10 @@ if __name__ == '__main__':
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_ESCAPE:
 						exit = True
+
+					if event.key == pygame.K_SPACE:
+						print("jump")
+						jump = 1
 
 				keys = pygame.key.get_pressed()
 				if keys[pygame.K_w]:
@@ -113,14 +118,14 @@ if __name__ == '__main__':
 
 			#print("mouse_move: ", mouse_move)
 			if mouse_move[0] < 0:
-				action_look_horizontal = -0.5 * mouse_move[0]
+				action_look_horizontal = -1 * mouse_move[0]
 			elif mouse_move[0] > 0:
-				action_look_horizontal = -0.5 * mouse_move[0]
+				action_look_horizontal = -1 * mouse_move[0]
 
 			if mouse_move[1] < 0:
-				action_look_vertical = -0.5 * mouse_move[1]
+				action_look_vertical = -1 * mouse_move[1]
 			elif mouse_move[1] > 0:
-				action_look_vertical = -0.5 * mouse_move[1]	 
+				action_look_vertical = -1 * mouse_move[1]	 
 
 			if keyboard_move[0] == 1:
 				action_forward_backward = 1
@@ -136,7 +141,7 @@ if __name__ == '__main__':
 							 action_strafe_horizontal, 
 							 action_forward_backward, 
 							 weapon_fire, 
-							 0, 
+							 jump, 
 							 0)
 			reward = env.step(action, num_steps=1)
 
