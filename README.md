@@ -26,7 +26,7 @@ At first, we are going run the Capture The Flag map as human playing mode. Try t
 
 1. You need to clone the official DeepMind Lab from https://github.com/deepmind/lab.
 2. Check that you can run one of human play example of DMLab.
-3. Place [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file into under [build](https://github.com/deepmind/lab/tree/master/assets/maps/built) folder of your DMLab folder.
+3. Place [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file into under [built](https://github.com/deepmind/lab/tree/master/assets/maps/built) folder of your DMLab folder.
 4. Copy [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under [factories](https://github.com/deepmind/lab/tree/master/game_scripts/factories) folder and [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under [levels](https://github.com/deepmind/lab/tree/master/game_scripts/levels) folder.
 5. Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root. 
 6. You can also run the 3 vs 3 environment that is already existed in DeepMind Lab [ctf_multi_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi_factory.lua), and [ctf_multi.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi.lua) file to same place of single game.
