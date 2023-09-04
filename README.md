@@ -11,7 +11,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
-This environment only needs a 7 actions because height of is same.
+This environment only needs 7 number of actions because map height is same at every place.
 
 ## 2. There is also map for the 3 vs 3 game that is provided from the DeepMind Lab
 
