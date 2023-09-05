@@ -3,6 +3,7 @@ import math
 import zmq
 import os
 import numpy as np
+import cv2
 import tensorflow as tf
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Input, Dense, Lambda, Add, Conv2D, Flatten, LSTMCell
@@ -24,14 +25,15 @@ from parametric_distribution import get_parametric_distribution_for_action_space
 parser = argparse.ArgumentParser(description='CTF IMPALA Server')
 parser.add_argument('--env_num', type=int, default=2, help='ID of environment')
 parser.add_argument('--gpu_use', type=bool, default=False, help='use gpu')
+parser.add_argument('--pretrained_model', type=str, help='pretrained model name')
 arguments = parser.parse_args()
 
 tfd = tfp.distributions
 
 if arguments.gpu_use == True:
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    tf.config.experimental.set_virtual_device_configuration(gpus[0],
-                [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=6000)])    
+    print("if arguments.gpu_use == True")
+    physical_devices = tf.config.list_physical_devices('GPU')
+    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
 else:
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -45,19 +47,23 @@ for i in range(0, arguments.env_num):
     socket_list.append(socket)
 
 
-num_actions = 11
-state_size = (80,80,3)    
+num_actions = 7
+state_size = (84,84,3)    
 
-batch_size = 1
+batch_size = 16
 
 unroll_length = 100
 queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
                            shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*state_size],
-                                   [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,64],[unroll_length+1,64]])
+                                   [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,128],[unroll_length+1,128]])
 Unroll = collections.namedtuple('Unroll', 'env_id reward done observation policy action memory_state carry_state')
 
 num_hidden_units = 512
 model = network.ActorCritic(num_actions, num_hidden_units)
+
+if arguments.pretrained_model != None:
+    print("Load Pretrained Model")
+    model.load_weights("model/" + arguments.pretrained_model)
 
 num_action_repeats = 1
 total_environment_frames = int(4e7)
@@ -66,21 +72,12 @@ iter_frame_ratio = (batch_size * unroll_length * num_action_repeats)
 final_iteration = int(math.ceil(total_environment_frames / iter_frame_ratio))
     
 lr = tf.keras.optimizers.schedules.PolynomialDecay(0.0001, final_iteration, 0)
-#optimizer = tf.keras.optimizers.Adam(lr)
-#optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr, rho=0.99, momentum=0.0, epsilon=1e-04)
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
 
 
+writer = tf.summary.create_file_writer("tensorboard_learner")
+
 def take_vector_elements(vectors, indices):
-    """
-    For a batch of vectors, take a single vector component
-    out of each vector.
-    Args:
-      vectors: a [batch x dims] Tensor.
-      indices: an int32 Tensor with `batch` entries.
-    Returns:
-      A Tensor with `batch` entries, one for each vector.
-    """
     return tf.gather_nd(vectors, tf.stack([tf.range(tf.shape(vectors)[0]), indices], axis=1))
 
 
@@ -95,15 +92,16 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
     dones = tf.transpose(dones, perm=[1, 0])
     memory_states = tf.transpose(memory_states, perm=[1, 0, 2])
     carry_states = tf.transpose(carry_states, perm=[1, 0, 2])
-        
+    
     batch_size = states.shape[0]
-        
+    
     online_variables = model.trainable_variables
     with tf.GradientTape() as tape:
         tape.watch(online_variables)
-               
+        
         learner_policies = tf.TensorArray(dtype=tf.float32, size=0, dynamic_size=True)
         learner_values = tf.TensorArray(dtype=tf.float32, size=0, dynamic_size=True)
+        cvae_losses = tf.TensorArray(dtype=tf.float32, size=0, dynamic_size=True)
 
         memory_state = memory_states[0]
         carry_state = carry_states[0]
@@ -115,9 +113,13 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
             
             memory_state = prediction[2]
             carry_state = prediction[3]
+            cvae_loss = prediction[4]
+
+            cvae_losses = cvae_losses.write(i, cvae_loss)
 
         learner_policies = learner_policies.stack()
         learner_values = learner_values.stack()
+        cvae_losses = cvae_losses.stack()
 
         learner_policies = tf.reshape(learner_policies, [states.shape[0], states.shape[1], -1])
         learner_values = tf.reshape(learner_values, [states.shape[0], states.shape[1], -1])
@@ -133,32 +135,32 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
             
         bootstrap_value = learner_values[-1]
         learner_values = learner_values[:-1]
-            
+
         discounting = 0.99
         discounts = tf.cast(~dones, tf.float32) * discounting
 
         actions = tf.convert_to_tensor(actions, dtype=tf.int32)
-            
+        
         target_action_log_probs = parametric_action_distribution.log_prob(learner_policies[:-1], actions)
         behaviour_action_log_probs = parametric_action_distribution.log_prob(agent_policies[:-1], actions)
-            
+        
         lambda_ = 1.0
-            
+        
         log_rhos = target_action_log_probs - behaviour_action_log_probs
-            
+        
         log_rhos = tf.convert_to_tensor(log_rhos, dtype=tf.float32)
         discounts = tf.convert_to_tensor(discounts, dtype=tf.float32)
         rewards = tf.convert_to_tensor(rewards, dtype=tf.float32)
         values = tf.convert_to_tensor(learner_values, dtype=tf.float32)
         bootstrap_value = tf.convert_to_tensor(bootstrap_value, dtype=tf.float32)
-            
+        
         clip_rho_threshold = tf.convert_to_tensor(1.0, dtype=tf.float32)
         clip_pg_rho_threshold = tf.convert_to_tensor(1.0, dtype=tf.float32)
-            
+        
         rhos = tf.math.exp(log_rhos)
-            
+        
         clipped_rhos = tf.minimum(clip_rho_threshold, rhos, name='clipped_rhos')
-            
+        
         cs = tf.minimum(1.0, rhos, name='cs')
         cs *= tf.convert_to_tensor(lambda_, dtype=tf.float32)
 
@@ -171,42 +173,42 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
             discount, c, delta = discounts[i], cs[i], deltas[i]
             acc = delta + discount * c * acc
             vs_minus_v_xs.append(acc)  
-            
+        
         vs_minus_v_xs = vs_minus_v_xs[::-1]
-            
+        
         vs = tf.add(vs_minus_v_xs, values, name='vs')
         vs_t_plus_1 = tf.concat([vs[1:], tf.expand_dims(bootstrap_value, 0)], axis=0)
         clipped_pg_rhos = tf.minimum(clip_pg_rho_threshold, rhos, name='clipped_pg_rhos')
-            
+        
         pg_advantages = (clipped_pg_rhos * (rewards + discounts * vs_t_plus_1 - values))
-            
+        
         vs = tf.stop_gradient(vs)
         pg_advantages = tf.stop_gradient(pg_advantages)
-            
+        
         actor_loss = -tf.reduce_mean(target_action_log_probs * pg_advantages)
-            
+        
         baseline_cost = 0.5
         v_error = values - vs
         critic_loss = baseline_cost * 0.5 * tf.reduce_mean(tf.square(v_error))
-            
+        
         entropy = tf.reduce_mean(parametric_action_distribution.entropy(learner_policies[:-1]))
         entropy_loss = 0.002 * -entropy
         
-        #tf.print("actor_loss: ", actor_loss)
-        #tf.print("critic_loss: ", critic_loss)
-        #tf.print("entropy_loss: ", entropy_loss)
-        #tf.print("")
-            
-        total_loss = actor_loss + critic_loss + entropy_loss
+        cvae_loss = -tf.reduce_mean(cvae_losses)
+
+        rl_loss = actor_loss + critic_loss + entropy_loss
+        total_loss = rl_loss + cvae_loss
 
     grads = tape.gradient(total_loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-    return total_loss
+    return rl_loss, cvae_loss
 
 
 @tf.function
 def prediction(state, memory_state, carry_state):
+    #tf.print("state.shape: ", state.shape)
+
     prediction = model(state, memory_state, carry_state, training=False)
     dist = tfd.Categorical(logits=prediction[0])
     action = int(dist.sample()[0])
@@ -230,14 +232,14 @@ def Data_Thread(coord, i):
     policies = np.zeros((unroll_length + 1, num_actions), dtype=np.float32)
     rewards = np.zeros((unroll_length + 1), dtype=np.float32)
     dones = np.zeros((unroll_length + 1), dtype=np.bool)
-    memory_states = np.zeros((unroll_length + 1, 64), dtype=np.float32)
-    carry_states = np.zeros((unroll_length + 1, 64), dtype=np.float32)
+    memory_states = np.zeros((unroll_length + 1, 128), dtype=np.float32)
+    carry_states = np.zeros((unroll_length + 1, 128), dtype=np.float32)
 
     memory_index = 0
 
     index = 0
-    memory_state = np.zeros([1,64], dtype=np.float32)
-    carry_state = np.zeros([1,64], dtype=np.float32)
+    memory_state = np.zeros([1,128], dtype=np.float32)
+    carry_state = np.zeros([1,128], dtype=np.float32)
     min_elapsed_time = 5.0
 
     reward_list = []
@@ -260,7 +262,7 @@ def Data_Thread(coord, i):
 
             memory_index = 1
 
-        state = tf.constant(np.array([message["observation"]]))
+        state = tf.constant(message["observation"])
         action, policy, new_memory_state, new_carry_state = prediction(state, memory_state, carry_state)
 
         env_ids[memory_index] = message["env_id"]
@@ -281,9 +283,21 @@ def Data_Thread(coord, i):
 
         memory_index += 1
         index += 1
-        if index % 200 == 0:
+        if index % 2000 == 0:
             average_reward = sum(reward_list[-50:]) / len(reward_list[-50:])
-            #print("average_reward: ", average_reward)
+            #print("state.numpy().shape: ", state.numpy().shape)
+            mean, logvar = model.CVAE.encode(state)
+            z = model.CVAE.reparameterize(mean, logvar)
+            reconstruced = model.CVAE.sample(z)
+            reconstruced = np.array(reconstruced)
+            reconstruced = cv2.resize(reconstruced[0], dsize=(320,224), interpolation=cv2.INTER_AREA)
+            reconstruced = cv2.cvtColor(reconstruced, cv2.COLOR_BGR2RGB)
+            #print("reconstruced.shape: ", reconstruced.shape)
+            cv2.imwrite("images/state_" + str(index) + ".png", np.array(state[0] * 255.0).astype(np.uint8))
+            cv2.imwrite("images/reconstruced_" + str(index) + ".png", (reconstruced * 255.0).astype(np.uint8))
+            #cv2.imshow('state[0]', np.array(state[0]))
+            #cv2.imshow('reconstruced', reconstruced)
+            #cv2.waitKey(1)
 
         end = time.time()
         elapsed_time = end - start
@@ -327,22 +341,31 @@ it = iter(dataset)
 def minimize(iterator):
     dequeue_data = next(iterator)
 
-    update(dequeue_data[3], dequeue_data[5], dequeue_data[4], dequeue_data[1], dequeue_data[2], dequeue_data[6], dequeue_data[7])
+    rl_loss, cvae_loss = update(dequeue_data[3], dequeue_data[5], dequeue_data[4], dequeue_data[1], dequeue_data[2], dequeue_data[6], dequeue_data[7])
+
+    return (rl_loss, cvae_loss)
 
 
 def Train_Thread(coord):
-    index = 0
+    training_step = 0
 
     while not coord.should_stop():
-        index += 1
+        #print("training_step: ", training_step)
 
-        minimize(it)
+        rl_loss, cvae_loss = minimize(it)
 
-        if index % 1000 == 0:
-            model.save_weights('model/reinforcement_model_' + str(index))
+        with writer.as_default():
+            tf.summary.scalar("rl_loss", rl_loss, step=training_step)
+            tf.summary.scalar("cvae_loss", cvae_loss, step=training_step)
+            writer.flush()
 
-        if index == 100000000:
+        if training_step % 1000 == 0:
+            model.save_weights('model/model_' + str(training_step))
+
+        if training_step == 100000000:
             coord.request_stop()
+
+        training_step += 1
 
 
 coord = tf.train.Coordinator(clean_stop_exception_types=None)

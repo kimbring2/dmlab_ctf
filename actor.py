@@ -19,16 +19,19 @@ parser = argparse.ArgumentParser(description='CTF IMPALA Actor')
 parser.add_argument('--env_id', type=int, default=0, help='ID of environment')
 arguments = parser.parse_args()
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+env_id = arguments.env_id
 
-writer = tf.summary.create_file_writer("tensorboard_kill")
+if env_id == 0:
+    writer = tf.summary.create_file_writer("tensorboard_actor")
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 context = zmq.Context()
 
 #  Socket to talk to server
 print("Connecting to hello world server…")
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:" + str(5555 + arguments.env_id))
+socket.connect("tcp://localhost:" + str(5555 + env_id))
 
 # Create a new environment object.
 env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED'],
@@ -57,8 +60,8 @@ num_actions = 7
 state_size = (84,84,3)
 
 
-def render(obs):
-    cv2.imshow('obs', obs)
+def render(obs, name):
+    cv2.imshow('name', obs)
     cv2.waitKey(1)
 
 
@@ -66,7 +69,7 @@ scores = []
 episodes = []
 average = []
 for episode_step in range(0, 2000000):
-    env.reset(seed=1)
+    env.reset(seed=arguments.env_id)
     obs = env.observations()
     obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
     obs = cv2.resize(obs_raw, dsize=(84,84), interpolation=cv2.INTER_AREA)
@@ -79,6 +82,7 @@ for episode_step in range(0, 2000000):
     step = 0
     while True:
         try:
+            #print("step: ", step)
             state_reshaped = np.reshape(state, (1,*state_size)) 
 
             env_output = {"env_id": np.array([arguments.env_id]), 
@@ -96,7 +100,7 @@ for episode_step in range(0, 2000000):
 
             done = not env.is_running()
             if done or step == 1000:
-                if arguments.env_id == 0:
+                if env_id == 0:
                     scores.append(reward_sum)
                     episodes.append(episode_step)
                     average.append(sum(scores[-50:]) / len(scores[-50:]))
@@ -105,9 +109,10 @@ for episode_step in range(0, 2000000):
                         tf.summary.scalar("average_reward", average[-1], step=episode_step)
                         writer.flush()
 
-                    print("average_reward: " + str(average[-1]))
+                    #print("average_reward: " + str(average[-1]))
                 else:
-                    print("reward_sum: " + str(reward_sum))
+                    #print("reward_sum: " + str(reward_sum))
+                    pass
 
                 break
 
@@ -116,8 +121,8 @@ for episode_step in range(0, 2000000):
             obs1 = cv2.resize(obs1_raw, dsize=(84,84), interpolation=cv2.INTER_AREA)
             next_state = obs1 / 255.0
 
-            if arguments.env_id == 0: 
-                render(obs1_raw)
+            #if env_id == 0: 
+            #    render(obs1_raw, "obs")
 
             reward_sum += reward
             state = next_state
