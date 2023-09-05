@@ -71,6 +71,11 @@ You can train the agent using below command.
 $ ./run_reinforcement_learning.sh [number of envs] [gpu use] [pretrained model]
 ```
 
+# Select the bot skill level
+There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua)
+
+<img src="image/set_bot_level.png" width="400">
+
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
 2. CTF map design tip: https://www.quake3world.com/forum/viewtopic.php?f=10&t=51042
