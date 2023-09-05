@@ -19,6 +19,8 @@ local factory = {}
 
 
 function factory.createLevelApi(kwargs)
+
+
   assert(kwargs.mapName)
   assert(kwargs.episodeLengthSeconds)
   assert(kwargs.botCount)
@@ -37,7 +39,7 @@ function factory.createLevelApi(kwargs)
     return color_bots:makeBots{
         count = kwargs.botCount,
         color = kwargs.color,
-        skill = kwargs.skill,
+        skill = kwargs.skill
     }
   end
 
