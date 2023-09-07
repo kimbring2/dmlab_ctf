@@ -18,7 +18,6 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 This environment only needs 7 number of actions because map height is same at every place.
 
 ## 2. There is also map for the 3 vs 3 game that is provided from the DeepMind Lab
-
 [![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
@@ -37,7 +36,7 @@ At first, we are going run the Capture The Flag map as human playing mode. Try t
 7. Run '**bazel run :game -- -l ctf_multi -s logToStdErr=true**' command from your DMLab root. 
 
 # PIP install
-Next, we will run same map as Python script. You
+Next, we will run same map as Python script.
 
 1. You need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md.
 2. After installing the whl file that is generated from first step, you need to copy the [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file under 
