@@ -72,7 +72,7 @@ You also need to prepare a Lua script for running map file with DmLab. Tutorial 
 You can train the agent using below command.
 
 ```
-$ ./run_reinforcement_learning.sh [number of envs] [gpu use] [pretrained model]
+$ ./run_reinforcement_learning.sh [number of envs] [gpu use]
 ```
 
 # Select the bot skill level
