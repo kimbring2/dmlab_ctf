@@ -78,12 +78,14 @@ $ ./run_reinforcement_learning.sh [number of envs] [gpu use] [pretrained model]
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
 
+<img src="image/set_bot_level.png" width="400">
+
 # Reward
+Because the goal of this game is captureing the flag, killing enemy is not included in reward.
 | Event  | Reward |
+| ------------- | ------------- |
 | pick up the enermy flag | 0.5 |
 | return the picked up flag to my base | 2.0 |
-
-<img src="image/set_bot_level.png" width="400">
 
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
