@@ -3,6 +3,10 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 
 # Version
 1. Python 3.8
+2. tensorflow==2.8.4
+3. tensorflow-probability==0.12.0
+4. opencv-python==4.2.0.34
+5. numpy==1.21.0
 
 # Demo video 
 ## 1. To make everything simple, Capture the Flag map is made for the 1 vs 1 game without any item and obstacle.
@@ -73,6 +77,11 @@ $ ./run_reinforcement_learning.sh [number of envs] [gpu use] [pretrained model]
 
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
+
+# Reward
+| Event  | Reward |
+| pick up the enermy flag | 0.5 |
+| return the picked up flag to my base | 2.0 |
 
 <img src="image/set_bot_level.png" width="400">
 
