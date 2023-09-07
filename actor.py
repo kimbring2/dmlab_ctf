@@ -53,6 +53,25 @@ ACTIONS = {
   }
 
 
+REWARDS = {
+    'PICKUP_REWARD': 0,
+    'PICKUP_GOAL': 0,
+    'TARGET_SCORE': 0,
+    'TAG_SELF': 0,
+    'TAG_PLAYER': 0,
+    'CTF_FLAG_BONUS': 1,
+    'CTF_CAPTURE_BONUS': 1,
+    'CTF_TEAM_BONUS': 0,
+    'CTF_FRAG_CARRIER_BONUS': 0,
+    'CTF_RECOVERY_BONUS': 0,
+    'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
+    'CTF_FLAG_DEFENSE_BONUS': 0,
+    'CTF_CARRIER_PROTECT_BONUS': 0,
+    'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
+    'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
+}
+
+
 ACTION_LIST = list(ACTIONS)
 #print("ACTION_LIST: ", ACTION_LIST)
 
@@ -92,11 +111,26 @@ for episode_step in range(0, 2000000):
             socket.send_pyobj(env_output)
             action = int(socket.recv_pyobj()['action'])
 
-            reward = env.step(ACTIONS[ACTION_LIST[action]], num_steps=2)
-            #reward = reward
-            #if reward != 2.0:
-                #print("flag_reward")
-            #    reward = 0.0
+            reward_game = env.step(ACTIONS[ACTION_LIST[action]], num_steps=2)
+
+            reward = 0
+            events = env.events()
+            if len(events) != 0:
+                for event in events:
+                    if event[0] == 'reward':
+                        event_info = event[1]
+
+                        reason = event_info[0]
+                        team = event_info[1]
+                        score = event_info[2]
+                        player_id = event_info[3]
+                        location = event_info[4]
+                        other_player_id = event_info[5]
+
+                        if team == 'blue':
+                            reward = float(REWARDS[reason])
+
+                        print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 
             done = not env.is_running()
             if done or step == 1000:

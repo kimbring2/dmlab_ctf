@@ -14,12 +14,15 @@ local colors = require 'common.colors'
 local events = require 'dmlab.system.events'
 local image = require 'dmlab.system.image'
 local color_bots = require 'common.color_bots'
+local game_rewards = require 'common.game_rewards'
+local inventory = require 'common.inventory'
+local tensor = require 'dmlab.system.tensor'
 
 local factory = {}
 
 
 function factory.createLevelApi(kwargs)
-
+  --print("kwargs.episodeLengthSeconds: ", kwargs.episodeLengthSeconds)
 
   assert(kwargs.mapName)
   assert(kwargs.episodeLengthSeconds)
@@ -27,6 +30,7 @@ function factory.createLevelApi(kwargs)
   local api = {}
 
   function api:gameType()
+    --print("api:gameType()")
     return game_types.CAPTURE_THE_FLAG
   end
 
@@ -36,11 +40,40 @@ function factory.createLevelApi(kwargs)
   end
 
   function api:addBots()
+    --print("api:addBots()")
+    --print("kwargs.skill: ", kwargs.skill)
+    --game:addScore(-1)
     return color_bots:makeBots{
         count = kwargs.botCount,
         color = kwargs.color,
-        skill = kwargs.skill
+        skill = 1
     }
+  end
+
+  function api:rewardOverride(kwargs)
+    --print("api:rewardOverride()")
+    --print("kwargs.playerId: ", kwargs.playerId)
+    --print("kwargs.team: ", kwargs.team)
+    --print("kwargs.location: ", kwargs.location)
+    --print("kwargs.score: ", kwargs.score)
+    --print("kwargs.reason: ", kwargs.reason)
+    --print("kwargs.otherPlayerId: ", kwargs.otherPlayerId)
+    --print("")
+
+    local playerId = kwargs.playerId
+    local reason = kwargs.reason
+    local team = kwargs.team
+    local location = kwargs.location or {0, 0, 0}
+    local otherPlayerId = kwargs.otherPlayerId or -1
+    local score = kwargs.score
+
+    local d = tensor.DoubleTensor
+    events:add('reward', reason, team, d{score}, d{playerId}, d(location),
+               d{otherPlayerId})
+
+    if kwargs.team == 'red' then
+      game:addScore(-kwargs.score)
+    end
   end
 
   local characterSkinData
@@ -58,6 +91,7 @@ function factory.createLevelApi(kwargs)
   end
 
   function api:playerModel(playerId, playerName)
+    --print("api:playerModel()")
     if playerId == 1 then
       return "crash_color"
     elseif playerId < 9 then
@@ -68,6 +102,8 @@ function factory.createLevelApi(kwargs)
   end
 
   local function updateSkin(playerSkin, rgbs)
+    --print("updateSkin")
+
     local skins = characterSkins()
     for i, charachterSkin in ipairs(skins) do
       local r, g, b = unpack(rgbs[i])
@@ -82,6 +118,7 @@ function factory.createLevelApi(kwargs)
 
   local spawnCount = 1
   function api:updateSpawnVars(spawnVars)
+    --print("api:updateSpawnVars()")
     if spawnVars.classname == 'info_player_start' then
       -- Spawn facing East.
       spawnVars.angle = '0'
