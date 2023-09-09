@@ -25,7 +25,6 @@ from parametric_distribution import get_parametric_distribution_for_action_space
 parser = argparse.ArgumentParser(description='CTF IMPALA Server')
 parser.add_argument('--env_num', type=int, default=2, help='ID of environment')
 parser.add_argument('--gpu_use', type=bool, default=False, help='use gpu')
-parser.add_argument('--pretrained_model', type=str, help='pretrained model name')
 arguments = parser.parse_args()
 
 tfd = tfp.distributions
@@ -42,28 +41,27 @@ socket_list = []
 for i in range(0, arguments.env_num):
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:" + str(5555 + i))
+    socket.bind("tcp://*:" + str(6555 + i))
 
     socket_list.append(socket)
 
 
 num_actions = 7
-state_size = (84,84,3)    
+screen_size = (64,64,3)    
 
-batch_size = 16
+batch_size = 96
 
-unroll_length = 100
-queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
-                           shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*state_size],
+unroll_length = 20
+queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
+                           shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*screen_size],[unroll_length+1,3],
                                    [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,128],[unroll_length+1,128]])
-Unroll = collections.namedtuple('Unroll', 'env_id reward done observation policy action memory_state carry_state')
+Unroll = collections.namedtuple('Unroll', 'env_id reward done obs_screen obs_inv policy action memory_state carry_state')
 
 num_hidden_units = 512
 model = network.ActorCritic(num_actions, num_hidden_units)
 
-if arguments.pretrained_model != None:
-    print("Load Pretrained Model")
-    model.load_weights("model/" + arguments.pretrained_model)
+#print("Load Pretrained Model")
+#model.load_weights("model/" + arguments.pretrained_model)
 
 num_action_repeats = 1
 total_environment_frames = int(4e7)
@@ -84,8 +82,9 @@ def take_vector_elements(vectors, indices):
 parametric_action_distribution = get_parametric_distribution_for_action_space(Discrete(num_actions))
 kl = tf.keras.losses.KLDivergence()
 
-def update(states, actions, agent_policies, rewards, dones, memory_states, carry_states):
-    states = tf.transpose(states, perm=[1, 0, 2, 3, 4])
+def update(screen_states, inv_states, actions, agent_policies, rewards, dones, memory_states, carry_states):
+    screen_states = tf.transpose(screen_states, perm=[1, 0, 2, 3, 4])
+    inv_states = tf.transpose(inv_states, perm=[1, 0, 2])
     actions = tf.transpose(actions, perm=[1, 0])
     agent_policies = tf.transpose(agent_policies, perm=[1, 0, 2])
     rewards = tf.transpose(rewards, perm=[1, 0])
@@ -93,7 +92,7 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
     memory_states = tf.transpose(memory_states, perm=[1, 0, 2])
     carry_states = tf.transpose(carry_states, perm=[1, 0, 2])
     
-    batch_size = states.shape[0]
+    batch_size = screen_states.shape[0]
     
     online_variables = model.trainable_variables
     with tf.GradientTape() as tape:
@@ -106,7 +105,7 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
         memory_state = memory_states[0]
         carry_state = carry_states[0]
         for i in tf.range(0, batch_size):
-            prediction = model(states[i], memory_state, carry_state, training=True)
+            prediction = model(screen_states[i], inv_states[i], memory_state, carry_state, training=True)
 
             learner_policies = learner_policies.write(i, prediction[0])
             learner_values = learner_values.write(i, prediction[1])
@@ -121,8 +120,8 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
         learner_values = learner_values.stack()
         cvae_losses = cvae_losses.stack()
 
-        learner_policies = tf.reshape(learner_policies, [states.shape[0], states.shape[1], -1])
-        learner_values = tf.reshape(learner_values, [states.shape[0], states.shape[1], -1])
+        learner_policies = tf.reshape(learner_policies, [screen_states.shape[0], screen_states.shape[1], -1])
+        learner_values = tf.reshape(learner_values, [screen_states.shape[0], screen_states.shape[1], -1])
 
         agent_logits = tf.nn.softmax(agent_policies[:-1])
         actions = actions[:-1]
@@ -206,10 +205,10 @@ def update(states, actions, agent_policies, rewards, dones, memory_states, carry
 
 
 @tf.function
-def prediction(state, memory_state, carry_state):
+def prediction(screen_state, inv_state, memory_state, carry_state):
     #tf.print("state.shape: ", state.shape)
 
-    prediction = model(state, memory_state, carry_state, training=False)
+    prediction = model(screen_state, inv_state, memory_state, carry_state, training=False)
     dist = tfd.Categorical(logits=prediction[0])
     action = int(dist.sample()[0])
     policy = prediction[0]
@@ -221,13 +220,14 @@ def prediction(state, memory_state, carry_state):
 
 
 @tf.function
-def enque_data(env_ids, rewards, dones, states, policies, actions, memory_states, carry_states):
-    queue.enqueue((env_ids, rewards, dones, states, policies, actions, memory_states, carry_states))
+def enque_data(env_ids, rewards, dones, screen_states, inv_states, policies, actions, memory_states, carry_states):
+    queue.enqueue((env_ids, rewards, dones, screen_states, inv_states, policies, actions, memory_states, carry_states))
 
 
 def Data_Thread(coord, i):
     env_ids = np.zeros((unroll_length + 1), dtype=np.int32)
-    states = np.zeros((unroll_length + 1, *state_size), dtype=np.float32)
+    screen_states = np.zeros((unroll_length + 1, *screen_size), dtype=np.float32)
+    inv_states = np.zeros((unroll_length + 1, 3), dtype=np.float32)
     actions = np.zeros((unroll_length + 1), dtype=np.int32)
     policies = np.zeros((unroll_length + 1, num_actions), dtype=np.float32)
     rewards = np.zeros((unroll_length + 1), dtype=np.float32)
@@ -249,10 +249,11 @@ def Data_Thread(coord, i):
 
         message = socket_list[i].recv_pyobj()
         if memory_index == unroll_length:
-            enque_data(env_ids, rewards, dones, states, policies, actions, memory_states, carry_states)
+            enque_data(env_ids, rewards, dones, screen_states, inv_states, policies, actions, memory_states, carry_states)
 
             env_ids[0] = env_ids[memory_index]
-            states[0] = states[memory_index]
+            screen_states[0] = screen_states[memory_index]
+            inv_states[0] = inv_states[memory_index]
             actions[0] = actions[memory_index]
             policies[0] = policies[memory_index]
             rewards[0] = rewards[memory_index]
@@ -262,11 +263,13 @@ def Data_Thread(coord, i):
 
             memory_index = 1
 
-        state = tf.constant(message["observation"])
-        action, policy, new_memory_state, new_carry_state = prediction(state, memory_state, carry_state)
+        screen_state = tf.constant(message["obs_screen"])
+        inv_state = tf.constant(message["obs_inv"])
+        action, policy, new_memory_state, new_carry_state = prediction(screen_state, inv_state, memory_state, carry_state)
 
         env_ids[memory_index] = message["env_id"]
-        states[memory_index] = message["observation"]
+        screen_states[memory_index] = message["obs_screen"]
+        inv_states[memory_index] = message["obs_inv"]
         actions[memory_index] = action
         policies[memory_index] = policy
         rewards[memory_index] = message["reward"]
@@ -341,7 +344,17 @@ it = iter(dataset)
 def minimize(iterator):
     dequeue_data = next(iterator)
 
-    rl_loss, cvae_loss = update(dequeue_data[3], dequeue_data[5], dequeue_data[4], dequeue_data[1], dequeue_data[2], dequeue_data[6], dequeue_data[7])
+    # env_id reward done obs_screen obs_inv policy action memory_state carry_state
+    # screen_states: 3
+    # inv_states: 4
+    # actions: 6
+    # agent_policies: 5
+    # rewards: 1
+    # dones: 2
+    # memory_states: 7
+    # carry_states: 8
+    rl_loss, cvae_loss = update(dequeue_data[3], dequeue_data[4], dequeue_data[6], dequeue_data[5], dequeue_data[1], 
+                                dequeue_data[2], dequeue_data[7], dequeue_data[8])
 
     return (rl_loss, cvae_loss)
 

@@ -29,8 +29,11 @@ function factory.createLevelApi(kwargs)
   assert(kwargs.botCount)
   local api = {}
 
+  function api:init(params)
+    self._playerView = {}
+  end
+
   function api:gameType()
-    --print("api:gameType()")
     return game_types.CAPTURE_THE_FLAG
   end
 
@@ -40,9 +43,6 @@ function factory.createLevelApi(kwargs)
   end
 
   function api:addBots()
-    --print("api:addBots()")
-    --print("kwargs.skill: ", kwargs.skill)
-    --game:addScore(-1)
     return color_bots:makeBots{
         count = kwargs.botCount,
         color = kwargs.color,
@@ -51,14 +51,6 @@ function factory.createLevelApi(kwargs)
   end
 
   function api:rewardOverride(kwargs)
-    --print("api:rewardOverride()")
-    --print("kwargs.playerId: ", kwargs.playerId)
-    --print("kwargs.team: ", kwargs.team)
-    --print("kwargs.location: ", kwargs.location)
-    --print("kwargs.score: ", kwargs.score)
-    --print("kwargs.reason: ", kwargs.reason)
-    --print("kwargs.otherPlayerId: ", kwargs.otherPlayerId)
-    --print("")
 
     local playerId = kwargs.playerId
     local reason = kwargs.reason
@@ -131,6 +123,43 @@ function factory.createLevelApi(kwargs)
     end
 
     return spawnVars
+  end
+
+  function api:customObservationSpec()
+    return {
+        {name = 'DEBUG.GADGET_AMOUNT', type = 'Doubles', shape = {1}},
+        {name = 'DEBUG.GADGET', type = 'Doubles', shape = {1}},
+        {name = 'DEBUG.HAS_RED_FLAG', type = 'Doubles', shape = {1}},
+    }
+  end
+
+  local function bool_to_number(value)
+   return value == true and 1.0 or value == false and 0.0
+  end
+
+  function api:customObservation(name)
+    local view = self._playerView[1]
+
+    local has_red_flag = 0.0
+    has_red_flag = view:hasPowerUp(inventory.POWERUPS['RED_FLAG'])
+    has_red_flag = bool_to_number(has_red_flag)
+    --print("type(has_red_flag): ", type(has_red_flag))
+    --print("has_red_flag: ", has_red_flag)
+
+    if name == 'DEBUG.GADGET_AMOUNT' then
+      return tensor.Tensor{view:gadgetAmount(view:gadget())}
+    elseif name == 'DEBUG.GADGET' then
+      return tensor.Tensor{view:gadget()}
+    elseif name == 'DEBUG.HAS_RED_FLAG' then
+      return tensor.Tensor{has_red_flag}
+    end
+    --elseif name == 'DEBUG.HAS_POWERUP' then
+    --  return tensor.Tensor{view:hasPowerUp()}
+  end
+
+  function api:updateInventory(loadOut)
+    local view = inventory.View(loadOut)
+    self._playerView[view:playerId()] = view
   end
 
   function api:modifyTexture(name, texture)

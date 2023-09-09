@@ -8,19 +8,23 @@ from datetime import datetime
 
 pygame.init()
 
-gameDisplay = pygame.display.set_mode((1280, 960))
+width = 640
+height = 640
+
+gameDisplay = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Platypus")
 pygame.mouse.set_visible(False)
 
 map_name = "ctf_simple"
 
 # Create a new environment object.
-env = deepmind_lab.Lab(map_name, ['RGB_INTERLEAVED'],
-                       {'fps': '60', 'width': '1280', 'height': '960'})
+# 'DEBUG.HAS_RED_FLAG'
+env = deepmind_lab.Lab(map_name, ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
+                       {'fps': '60', 'width': str(width), 'height': str(height)})
 #env = deepmind_lab.Lab("contributed/dmlab30/lasertag_one_opponent_small", ['RGB_INTERLEAVED'],
 #                       {'fps': '30', 'width': '1280', 'height': '960'})
-#env = deepmind_lab.Lab("tests/event_test", ['RGB_INTERLEAVED'],
-#                       {'fps': '30', 'width': '640', 'height': '640'})
+#env = deepmind_lab.Lab("tests/update_inventory_test", ['RGB_INTERLEAVED', 'DEBUG.AMOUNT', 'DEBUG.GADGET'],
+#                       {'fps': '60', 'width': '640', 'height': '640'})
 
 def _action(*entries):
   return np.array(entries, dtype=np.intc)
@@ -70,6 +74,11 @@ def render(obs):
 save_path = '/media/kimbring2/be356a87-def6-4be8-bad2-077951f0f3da/cfg_data/'
 
 clock = pygame.time.Clock()
+
+
+def one_hot(a, num_classes):
+    return np.squeeze(np.eye(num_classes)[a])
+
 
 if __name__ == '__main__':
 	num_states = (80, 60)
@@ -273,15 +282,30 @@ if __name__ == '__main__':
 				break
 
 			obs = env.observations()
-			#print("obs.keys(): ", obs.keys())
+			print("obs.keys(): ", obs.keys())
+
+			#cus_obs = env.custom_observations()
+
 			#print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
 			#obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
-			obs = obs['RGB_INTERLEAVED']
+			obs_screen = obs['RGB_INTERLEAVED']
+			obs_gadget_amount = obs['DEBUG.GADGET_AMOUNT']
+			obs_gadget = obs['DEBUG.GADGET']
+			obs_has_red_flag = obs['DEBUG.HAS_RED_FLAG']
+
+			has_red_flag_onehot = one_hot(int(obs_has_red_flag), 2) 
+
+			print("obs_gadget_amount: ", obs_gadget_amount)
+			print("has_red_flag_onehot: ", has_red_flag_onehot)
+
+			obs_inv = np.concatenate([obs_gadget_amount / 100.0, has_red_flag_onehot])
+			print("obs_inv: ", obs_inv)
+			print("")
 
 			episode_list.append(episode)
 			step_list.append(step)
 			
-			frame = cv2.cvtColor(obs, cv2.COLOR_BGR2RGB)
+			frame = cv2.cvtColor(obs_screen, cv2.COLOR_BGR2RGB)
 			frame = cv2.resize(frame, dsize=(720, 640), interpolation=cv2.INTER_AREA)
 			frame_list.append(frame)
 
@@ -296,7 +320,7 @@ if __name__ == '__main__':
 			done_list.append(done)
 
 			#surf = pygame.surfarray.make_surface(obs)
-			obs_surf = cv2.rotate(obs, cv2.ROTATE_90_COUNTERCLOCKWISE)
+			obs_surf = cv2.rotate(obs_screen, cv2.ROTATE_90_COUNTERCLOCKWISE)
 			obs_surf = cv2.flip(obs_surf, 0)
 			surf = pygame.surfarray.make_surface(obs_surf)
 			gameDisplay.blit(surf, (0, 0))
@@ -305,11 +329,12 @@ if __name__ == '__main__':
 			#pygame.mouse.set_pos([720 / 2, 640 / 2])
 			step += 1
 
+			print("step: ", step)
+
 			#for i in range(0, 1000):
 			#	tset = 2^5
 			#pygame.event.pump()
 			#pygame.time.delay(100)
 			clock.tick(60)
-			#print("")
 
 	env.close()
