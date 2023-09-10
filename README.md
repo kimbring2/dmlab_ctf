@@ -47,7 +47,7 @@ $ python3 -m pip install /tmp/dmlab_pkg/deepmind_lab-1.0-py3-none-any.whl
 ```
 2. After installing the whl file that is generated from first step, you need to copy the [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file under 
 'deepmind_lab/baselab/maps' folder.
-3. Run the [CTF_Single_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
+3. Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
 4. Check that you can import DmLab using 'import deepmind_lab' code.
 
 # How to customize map
