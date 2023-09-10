@@ -47,10 +47,8 @@ $ python3 -m pip install /tmp/dmlab_pkg/deepmind_lab-1.0-py3-none-any.whl
 ```
 2. After installing the whl file that is generated from first step, you need to copy the [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file under 
 'deepmind_lab/baselab/maps' folder.
-3. Open [CTF_Single_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/CTF_Single_Test.ipynb) file.
+3. Run the [CTF_Single_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
 4. Check that you can import DmLab using 'import deepmind_lab' code.
-5. Run entire Jupyter Notebook code.
-6. You can also test the 3 vs 3 environment after copying the [ctf_multi_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi_factory.lua), and [ctf_multi.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi.lua) file to same place of single game. After copying them, open [CTF_Multi_Test.ipynb](https://github.com/kimbring2/dmlab_ctf/blob/main/CTF_Multi_Test.ipynb) file to check.
 
 # How to customize map
 You can design your own map using program called GtkRadiant. I also make the ctf_simple map like a below image.
