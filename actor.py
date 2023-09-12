@@ -16,13 +16,14 @@ from absl import flags
 import deepmind_lab
 
 parser = argparse.ArgumentParser(description='CTF IMPALA Actor')
+parser.add_argument('--exp_name', type=str, default="kill", help='name of experiment')
 parser.add_argument('--env_id', type=int, default=0, help='ID of environment')
 arguments = parser.parse_args()
 
 env_id = arguments.env_id
 
 if env_id == 0:
-    writer = tf.summary.create_file_writer("tensorboard_actor")
+    writer = tf.summary.create_file_writer(arguments.exp_name + '/' + "tensorboard_actor")
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -31,7 +32,7 @@ context = zmq.Context()
 #  Socket to talk to server
 print("Connecting to hello world server…")
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:" + str(6555 + env_id))
+socket.connect("tcp://localhost:" + str(6555 + arguments.env_id))
 
 # Create a new environment object.
 width = 320
@@ -44,7 +45,8 @@ env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 
 #                       {'fps': '60', 'width': '640', 'height': '640'})
 
 def _action(*entries):
-  return np.array(entries, dtype=np.intc)
+    return np.array(entries, dtype=np.intc)
+
 
 ACTIONS = {
       'look_left': _action(-20, 0, 0, 0, 0, 0, 0),
@@ -57,23 +59,45 @@ ACTIONS = {
   }
 
 
-REWARDS = {
-    'PICKUP_REWARD': 0,
-    'PICKUP_GOAL': 0,
-    'TARGET_SCORE': 0,
-    'TAG_SELF': 0,
-    'TAG_PLAYER': 0,
-    'CTF_FLAG_BONUS': 0,
-    'CTF_CAPTURE_BONUS': 1.0,
-    'CTF_TEAM_BONUS': 0,
-    'CTF_FRAG_CARRIER_BONUS': 0,
-    'CTF_RECOVERY_BONUS': 0,
-    'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
-    'CTF_FLAG_DEFENSE_BONUS': 0,
-    'CTF_CARRIER_PROTECT_BONUS': 0,
-    'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
-    'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
-}
+if arguments.exp_name == 'kill':
+    REWARDS = {
+        'PICKUP_REWARD': 0,
+        'PICKUP_GOAL': 0,
+        'TARGET_SCORE': 0,
+        'TAG_SELF': 0,
+        'TAG_PLAYER': 0,
+        'TAG_PLAYER': 1,
+        'CTF_FLAG_BONUS': 0,
+        'CTF_CAPTURE_BONUS': 0,
+        'CTF_TEAM_BONUS': 0,
+        'CTF_FRAG_CARRIER_BONUS': 0,
+        'CTF_RECOVERY_BONUS': 0,
+        'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
+        'CTF_FLAG_DEFENSE_BONUS': 0,
+        'CTF_CARRIER_PROTECT_BONUS': 0,
+        'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
+        'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
+    }
+elif arguments.exp_name == 'flag':
+    REWARDS = {
+        'PICKUP_REWARD': 0,
+        'PICKUP_GOAL': 0,
+        'TARGET_SCORE': 0,
+        'TAG_SELF': 0,
+        'TAG_PLAYER': 0,
+        'TAG_PLAYER': 0,
+        'CTF_FLAG_BONUS': 0,
+        'CTF_CAPTURE_BONUS': 1,
+        'CTF_TEAM_BONUS': 0,
+        'CTF_FRAG_CARRIER_BONUS': 0,
+        'CTF_RECOVERY_BONUS': 0,
+        'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
+        'CTF_FLAG_DEFENSE_BONUS': 0,
+        'CTF_CARRIER_PROTECT_BONUS': 0,
+        'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
+        'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
+    }
+
 
 
 ACTION_LIST = list(ACTIONS)
@@ -153,7 +177,7 @@ for episode_step in range(0, 2000000):
                         print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 
             done = not env.is_running()
-            if done or step == 250:
+            if done or step == 500:
                 if env_id == 0:
                     scores.append(reward_sum)
                     episodes.append(episode_step)
@@ -196,6 +220,6 @@ for episode_step in range(0, 2000000):
             step += 1
         except (tf.errors.UnavailableError, tf.errors.CancelledError):
             print('Inference call failed. This is normal at the end of training.')
-            logging.info('Inference call failed. This is normal at the end of training.')
+            #logging.info('Inference call failed. This is normal at the end of training.')
 
 env.close()

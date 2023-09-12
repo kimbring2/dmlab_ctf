@@ -23,8 +23,12 @@ import gym
 from parametric_distribution import get_parametric_distribution_for_action_space
 
 parser = argparse.ArgumentParser(description='CTF IMPALA Server')
+parser.add_argument('--exp_name', type=str, default="kill", help='name of experiment')
 parser.add_argument('--env_num', type=int, default=2, help='ID of environment')
+parser.add_argument('--batch_size', type=int, default=2, help='batch size of training')
+parser.add_argument('--unroll_length', type=int, default=50, help='unroll length of trajectory')
 parser.add_argument('--gpu_use', type=bool, default=False, help='use gpu')
+parser.add_argument('--pretrained_model', type=str, help='pretrained model name')
 arguments = parser.parse_args()
 
 tfd = tfp.distributions
@@ -49,9 +53,9 @@ for i in range(0, arguments.env_num):
 num_actions = 7
 screen_size = (64,64,3)    
 
-batch_size = 96
+batch_size = arguments.batch_size
 
-unroll_length = 20
+unroll_length = 50
 queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
                            shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*screen_size],[unroll_length+1,3],
                                    [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,128],[unroll_length+1,128]])
@@ -60,8 +64,8 @@ Unroll = collections.namedtuple('Unroll', 'env_id reward done obs_screen obs_inv
 num_hidden_units = 512
 model = network.ActorCritic(num_actions, num_hidden_units)
 
-#print("Load Pretrained Model")
-#model.load_weights("model/" + arguments.pretrained_model)
+print("Load Pretrained Model")
+model.load_weights("kill/model/" + "model_1000")
 
 num_action_repeats = 1
 total_environment_frames = int(4e7)
@@ -72,8 +76,7 @@ final_iteration = int(math.ceil(total_environment_frames / iter_frame_ratio))
 lr = tf.keras.optimizers.schedules.PolynomialDecay(0.0001, final_iteration, 0)
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
 
-
-writer = tf.summary.create_file_writer("tensorboard_learner")
+writer = tf.summary.create_file_writer(arguments.exp_name + "/tensorboard_learner")
 
 def take_vector_elements(vectors, indices):
     return tf.gather_nd(vectors, tf.stack([tf.range(tf.shape(vectors)[0]), indices], axis=1))
@@ -263,9 +266,14 @@ def Data_Thread(coord, i):
 
             memory_index = 1
 
-        screen_state = tf.constant(message["obs_screen"])
-        inv_state = tf.constant(message["obs_inv"])
-        action, policy, new_memory_state, new_carry_state = prediction(screen_state, inv_state, memory_state, carry_state)
+        #screen_state = tf.constant(message["obs_screen"])
+        #inv_state = tf.constant(message["obs_inv"])
+        screen_state = tf.convert_to_tensor(message["obs_screen"], dtype=tf.float32)
+        inv_state = tf.convert_to_tensor(message["obs_inv"], dtype=tf.float32)
+
+        action, policy, new_memory_state, new_carry_state = prediction(screen_state, inv_state, 
+                                                                       tf.convert_to_tensor(memory_state, dtype=tf.float32), 
+                                                                       tf.convert_to_tensor(carry_state, dtype=tf.float32))
 
         env_ids[memory_index] = message["env_id"]
         screen_states[memory_index] = message["obs_screen"]
@@ -289,14 +297,14 @@ def Data_Thread(coord, i):
         if index % 2000 == 0:
             average_reward = sum(reward_list[-50:]) / len(reward_list[-50:])
             #print("state.numpy().shape: ", state.numpy().shape)
-            mean, logvar = model.CVAE.encode(state)
+            mean, logvar = model.CVAE.encode(screen_state)
             z = model.CVAE.reparameterize(mean, logvar)
             reconstruced = model.CVAE.sample(z)
             reconstruced = np.array(reconstruced)
             reconstruced = cv2.resize(reconstruced[0], dsize=(320,224), interpolation=cv2.INTER_AREA)
             reconstruced = cv2.cvtColor(reconstruced, cv2.COLOR_BGR2RGB)
             #print("reconstruced.shape: ", reconstruced.shape)
-            cv2.imwrite("images/state_" + str(index) + ".png", np.array(state[0] * 255.0).astype(np.uint8))
+            cv2.imwrite("images/state_" + str(index) + ".png", np.array(screen_state[0] * 255.0).astype(np.uint8))
             cv2.imwrite("images/reconstruced_" + str(index) + ".png", (reconstruced * 255.0).astype(np.uint8))
             #cv2.imshow('state[0]', np.array(state[0]))
             #cv2.imshow('reconstruced', reconstruced)
@@ -373,7 +381,7 @@ def Train_Thread(coord):
             writer.flush()
 
         if training_step % 1000 == 0:
-            model.save_weights('model/model_' + str(training_step))
+            model.save_weights(arguments.exp_name + '/' + 'model/model_' + str(training_step))
 
         if training_step == 100000000:
             coord.request_stop()

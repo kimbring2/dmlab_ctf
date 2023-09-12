@@ -15,9 +15,9 @@ class CVAE(tf.keras.Model):
         self.latent_dim = latent_dim
         self.encoder = tf.keras.Sequential(
             [
-                layers.InputLayer(input_shape=(84, 84, 3)),
+                layers.InputLayer(input_shape=(64, 64, 3)),
+                layers.Conv2D(filters=16, kernel_size=3, strides=(2, 2), activation='relu'),
                 layers.Conv2D(filters=32, kernel_size=3, strides=(2, 2), activation='relu'),
-                layers.Conv2D(filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
                 layers.Flatten(),
                 layers.Dense(latent_dim + latent_dim),
             ]
@@ -26,10 +26,10 @@ class CVAE(tf.keras.Model):
         self.decoder = tf.keras.Sequential(
             [
                 layers.InputLayer(input_shape=(latent_dim,)),
-                layers.Dense(units=21*21*32, activation=tf.nn.relu),
-                layers.Reshape(target_shape=(21, 21, 32)),
-                layers.Conv2DTranspose(filters=64, kernel_size=3, strides=2, padding='same', activation='relu'),
+                layers.Dense(units=16*16*16, activation=tf.nn.relu),
+                layers.Reshape(target_shape=(16, 16, 16)),
                 layers.Conv2DTranspose(filters=32, kernel_size=3, strides=2, padding='same', activation='relu'),
+                layers.Conv2DTranspose(filters=16, kernel_size=3, strides=2, padding='same', activation='relu'),
                 layers.Conv2DTranspose(filters=3, kernel_size=3, strides=1, padding='same')
             ]
         )
@@ -75,7 +75,10 @@ class ActorCritic(tf.keras.Model):
 
     self.lstm = layers.LSTM(128, return_sequences=True, return_state=True)
     
-    self.common = layers.Dense(num_hidden_units, activation="relu")
+    self.common_1 = layers.Dense(num_hidden_units, activation="relu", kernel_regularizer='l2')
+    self.common_2 = layers.Dense(64, activation="relu", kernel_regularizer='l2')
+    self.common_3 = layers.Dense(num_hidden_units, activation="relu", kernel_regularizer='l2')
+
     self.actor = layers.Dense(num_actions)
     self.critic = layers.Dense(1)
 
@@ -88,29 +91,29 @@ class ActorCritic(tf.keras.Model):
 
     return config
     
-  def call(self, inputs: tf.Tensor, memory_state: tf.Tensor, carry_state: tf.Tensor, training) -> Tuple[tf.Tensor, tf.Tensor, 
-                                                                                                        tf.Tensor, tf.Tensor]:
-    batch_size = tf.shape(inputs)[0]
+  def call(self, screen_obs: tf.Tensor, screen_inv: tf.Tensor, memory_state: tf.Tensor, carry_state: tf.Tensor, training) -> Tuple[tf.Tensor, tf.Tensor, 
+                                                                                                                                   tf.Tensor, tf.Tensor,
+                                                                                                                                   tf.Tensor]:
+    batch_size = tf.shape(screen_obs)[0]
 
-    #tf.print("inputs.shape: ", inputs.shape)
-
-    mean, logvar = self.CVAE.encode(inputs)
+    mean, logvar = self.CVAE.encode(screen_obs)
     cvae_output = tf.concat((mean, logvar), axis=1)
     cvae_output_reshaped = layers.Reshape((16,32))(cvae_output)
 
     initial_state = (memory_state, carry_state)
     lstm_output, final_memory_state, final_carry_state  = self.lstm(cvae_output_reshaped, initial_state=initial_state, 
                                                                     training=training)
-    X_input = layers.Flatten()(lstm_output)
+    X_input_screen = layers.Flatten()(lstm_output)
+    X_input_screen = self.common_1(X_input_screen)
 
-    #tf.print("X_input.shape: ", X_input.shape)
-    x = self.common(X_input)
+    X_input_inv = self.common_2(screen_inv)
 
-    #tf.print("")
+    X_input = tf.concat([X_input_screen, X_input_inv], 1)
+    x = self.common_3(X_input)
 
     z = self.CVAE.reparameterize(mean, logvar)
     x_logit = self.CVAE.decode(z)
-    cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits=x_logit, labels=inputs)
+    cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits=x_logit, labels=screen_obs)
     
     logpx_z = -tf.reduce_sum(cross_ent, axis=[1, 2, 3])
     logpz = log_normal_pdf(z, 0., 0.)
