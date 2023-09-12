@@ -1,5 +1,5 @@
 # Introduction
-Implementation of [Capture the Flag: the emergence of complex cooperative agents](https://deepmind.com/blog/article/capture-the-flag-science) of  DeepMind. I first describe how to set the DeepMind lab for running the Capture The Flag map. Next, I also add a way how to desing your own simple CTF map. Finally, I am going to train the agent for Capture the Flag game in 1 vs 1 case. The scale of network will be little small than original paper. However, you can know a basic knowleade how to build the agent for CTF game.
+Implementation of [Capture the Flag: the emergence of complex cooperative agents](https://deepmind.com/blog/article/capture-the-flag-science) of the DeepMind. I first describe how to set the DeepMind lab for running the Capture The Flag map. Next, I also add a way how to desing your own simple CTF map. Finally, I am going to train the agent for Capture the Flag game in 1 vs 1 case. The scale of network will be little small than original paper. However, you can know a basic knowleade how to build the agent for CTF game.
 
 # Version
 1. Python 3.8
@@ -28,22 +28,18 @@ This environment needs a 11 actions because there are many height change during 
 At first, we are going run the Capture The Flag map as human playing mode. Try to follow the below intructions for that.
 
 ## 1. Check you can run the default environment
-You need to clone the official DeepMind Lab from https://github.com/deepmind/lab.
+You need to clone the official DMLab from https://github.com/deepmind/lab. After that, run one of human play example of DMLab to check you can run the DMLab well.
 
-Check that you can run one of human play example of DMLab.
-
-Copy Caputre the flag files.
+Next, copy Caputre the flag files to the DeepMind lab folder what you cloned. Please set the path as your own.
 ```
 $ sh map_copy_dmlab.sh [deepmind lab path]
 e.g $ sh map_copy_dmlab.sh /home/kimbring2/lab
 ```
 
-Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root.
+Finally, you can run the Capture the Flag game using the '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root.
 
 ## 2. PIP install
-Next, we need to run same environment from Python script.
-
-You need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md. Below is example command in my workspace.
+It is possible that you run the the DMLab from Python script. Before, you should install the Python pacakge of DMLab. Follow [official intruction](https://github.com/deepmind/lab/blob/master/python/pip_package/README.md) to generate the install file for Python. Below is example command in my workspace.
 ```
 $ export PYTHON_BIN_PATH="/usr/bin/python3"
 $ bazel build -c opt --python_version=PY3 //python/pip_package:build_pip_package
@@ -51,10 +47,9 @@ $./bazel-bin/python/pip_package/build_pip_package /tmp/dmlab_pkg
 $ python3 -m pip install /tmp/dmlab_pkg/deepmind_lab-1.0-py3-none-any.whl
 ```
 
-Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
-Check that you can import DmLab using 'import deepmind_lab' code.
+After installing, run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file. Check that you can import DmLab using 'import deepmind_lab' code from Python script.
 
-Copy Caputre the flag files.
+The path of cloned DMLab and Python installed are different. Therefore, you need to copy the map files to Python package path..
 ```
 $ sh map_copy_python.sh [deepmind lab path of Python]
 e.g $ sh map_copy_python.sh /home/kimbring2/.local/lib/python3.8/site-packages/deepmind_lab
