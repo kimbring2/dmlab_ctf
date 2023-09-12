@@ -28,22 +28,22 @@ This environment needs a 11 actions because there are many height change during 
 At first, we are going run the Capture The Flag map as human playing mode. Try to follow the below intructions for that.
 
 ## 1. Check you can run the default environment
-1. You need to clone the official DeepMind Lab from https://github.com/deepmind/lab.
+- You need to clone the official DeepMind Lab from https://github.com/deepmind/lab.
 
-2. Check that you can run one of human play example of DMLab.
+- Check that you can run one of human play example of DMLab.
 
-3. Copy Caputre the flag files.
+- Copy Caputre the flag files.
 ```
 $ sh map_copy_dmlab.sh [deepmind lab path]
 e.g $ sh map_copy_dmlab.sh /home/kimbring2/lab
 ```
 
-4. Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root.
+- Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root.
 
 ## 2. PIP install
 Next, we need to run same environment from Python script.
 
-1. You need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md. Below is example command in my workspace.
+-  You need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md. Below is example command in my workspace.
 ```
 $ export PYTHON_BIN_PATH="/usr/bin/python3"
 $ bazel build -c opt --python_version=PY3 //python/pip_package:build_pip_package
@@ -51,10 +51,10 @@ $./bazel-bin/python/pip_package/build_pip_package /tmp/dmlab_pkg
 $ python3 -m pip install /tmp/dmlab_pkg/deepmind_lab-1.0-py3-none-any.whl
 ```
 
-2. Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
-3. Check that you can import DmLab using 'import deepmind_lab' code.
+- Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
+- Check that you can import DmLab using 'import deepmind_lab' code.
 
-4. Copy Caputre the flag files.
+- Copy Caputre the flag files.
 ```
 $ sh map_copy_python.sh [deepmind lab path of Python]
 e.g $ sh map_copy_python.sh /home/kimbring2/.local/lib/python3.8/site-packages/deepmind_lab
@@ -91,7 +91,7 @@ $ ./run_reinforcement_learning.sh [number of envs] [gpu use]
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
 
-<img src="image/set_bot_level.png" width="400">
+<img src="images/set_bot_level.png" width="400">
 
 # Reward
 Because the goal of this game is captureing the flag, killing enemy is not included in reward.
