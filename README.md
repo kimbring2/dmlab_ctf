@@ -27,15 +27,20 @@ This environment needs a 11 actions because there are many height change during 
 # Setting
 At first, we are going run the Capture The Flag map as human playing mode. Try to follow the below intructions for that.
 
+## 1. Check you can run the default environment
 1. You need to clone the official DeepMind Lab from https://github.com/deepmind/lab.
-2. Check that you can run one of human play example of DMLab.
-3. Place [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file into under [built](https://github.com/deepmind/lab/tree/master/assets/maps/built) folder of your DMLab folder.
-4. Copy [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under [factories](https://github.com/deepmind/lab/tree/master/game_scripts/factories) folder and [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under [levels](https://github.com/deepmind/lab/tree/master/game_scripts/levels) folder.
-5. Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root. 
-6. You can also run the 3 vs 3 environment that is already existed in DeepMind Lab [ctf_multi_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi_factory.lua), and [ctf_multi.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_multi.lua) file to same place of single game.
-7. Run '**bazel run :game -- -l ctf_multi -s logToStdErr=true**' command from your DMLab root. 
 
-# PIP install
+2. Check that you can run one of human play example of DMLab.
+
+3. Copy Caputre the flag files.
+```
+$ sh map_copy_dmlab.sh [deepmind lab path]
+e.g $ sh map_copy_dmlab.sh /home/kimbring2/lab
+```
+
+4. Run '**bazel run :game -- -l ctf_simple -s logToStdErr=true**' command from your DMLab root.
+
+## 2. PIP install
 Next, we need to run same environment from Python script.
 
 1. You need to install DMLab using PIP package of Python. Follow official intruction for that from https://github.com/deepmind/lab/blob/master/python/pip_package/README.md. Below is example command in my workspace.
@@ -45,10 +50,15 @@ $ bazel build -c opt --python_version=PY3 //python/pip_package:build_pip_package
 $./bazel-bin/python/pip_package/build_pip_package /tmp/dmlab_pkg
 $ python3 -m pip install /tmp/dmlab_pkg/deepmind_lab-1.0-py3-none-any.whl
 ```
-2. After installing the whl file that is generated from first step, you need to copy the [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua) file under the 'deepmind_lab/baselab/game_scripts/levels' path of installed Python package. Next, copy the [ctf_simple_factory.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple_factory.lua) file under 'deepmind_lab/baselab/game_scripts/factories' folder. Finally, copy the [ctf_simple.aas](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.aas), [ctf_simple.bsp](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.bsp) file under 
-'deepmind_lab/baselab/maps' folder.
-3. Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
-4. Check that you can import DmLab using 'import deepmind_lab' code.
+
+2. Run the [env_test.py](https://github.com/kimbring2/dmlab_ctf/blob/main/env_test.py) file.
+3. Check that you can import DmLab using 'import deepmind_lab' code.
+
+4. Copy Caputre the flag files.
+```
+$ sh map_copy_python.sh [deepmind lab path of Python]
+e.g $ sh map_copy_python.sh /home/kimbring2/.local/lib/python3.8/site-packages/deepmind_lab
+```
 
 # How to customize map
 You can design your own map using program called GtkRadiant. I also make the ctf_simple map like a below image.
