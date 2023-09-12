@@ -24,6 +24,10 @@ This environment only needs 7 number of actions because map height is same at ev
 
 This environment needs a 11 actions because there are many height change during game playing.
 
+# Agent Network Architecture
+## Kill model
+<img src="images/ctf_network_base.png" width="700">
+
 # Setting
 At first, we are going run the Capture The Flag map as human playing mode. Try to follow the below intructions for that.
 
