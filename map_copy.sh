@@ -1,7 +1,6 @@
-sudo cp ctf_simple.aas /usr/local/lib/python3.8/dist-packages/deepmind_lab/baselab/maps
+DMLAB_PATH=$1
 
-sudo cp ctf_simple.bsp /usr/local/lib/python3.8/dist-packages/deepmind_lab/baselab/maps
-
-sudo cp ctf_simple.lua /usr/local/lib/python3.8/dist-packages/deepmind_lab/baselab/game_scripts/levels
-
-sudo cp ctf_simple_factory.lua /usr/local/lib/python3.8/dist-packages/deepmind_lab/baselab/game_scripts/factories
+sudo cp ctf_simple.aas "${DMLAB_PATH}/baselab/maps"
+sudo cp ctf_simple.bsp "${DMLAB_PATH}/baselab/maps"
+sudo cp ctf_simple.lua "${DMLAB_PATH}/baselab/game_scripts/levels"
+sudo cp ctf_simple_factory.lua "${DMLAB_PATH}/baselab/game_scripts/factories"
