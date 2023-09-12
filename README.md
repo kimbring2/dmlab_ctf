@@ -76,12 +76,15 @@ In my case, I use a command 'sudo ./compile_map_test.sh -a -m /home/kimbring2/Gt
 # Lua script
 You also need to prepare a Lua script for running map file with DmLab. Tutorial for that can be found at [minimal_level_tutorial](https://github.com/deepmind/lab/blob/master/docs/developers/minimal_level_tutorial.md). The only important thing is setting the game type as CAPTURE_THE_FLAG. 
 
-# Training agent
-You can train the agent using below command.
+# Training agent for killing the enemy
+You can train the agent using below command. Experiment name should be one of 'kill', 'flag'. The 'kill' environment gives a reward when agent kill the enemy agent. Otherwise, agent can obtain the reward when it grab the enemy team flag and bring it back to home team base in the 'flag' environment
 
 ```
-$ ./run_reinforcement_learning.sh [number of envs] [gpu use]
+$ ./run_reinforcement_learning.sh [number of envs] [gpu use] [batch size] [unroll length] [experiment name]
+e.g. $ ./run_reinforcement_learning.sh 64 True 64 50 kill
 ```
+
+Tensorboard log file is avilable from the '/kill/tensorboard_actor' and '/kill/tensorboard_learner' folder. 
 
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
@@ -94,6 +97,11 @@ Because the goal of this game is captureing the flag, killing enemy is not inclu
 | ------------- | ------------- |
 | pick up the enermy flag | 0.5 |
 | return the picked up flag to my base | 2.0 |
+
+# Evaluting Result
+
+## 'kill' environment
+
 
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
