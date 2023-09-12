@@ -85,7 +85,7 @@ e.g. $ ./run_reinforcement_learning.sh 64 True 64 50 kill
 ```
 
 Tensorboard log file is avilable from the '/kill/tensorboard_actor' and '/kill/tensorboard_learner' folder. 
-<img src="images/kill_train_result.png" width="400">
+<img src="images/kill_train_result.png" width="700">
 
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
