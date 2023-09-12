@@ -85,6 +85,7 @@ e.g. $ ./run_reinforcement_learning.sh 64 True 64 50 kill
 ```
 
 Tensorboard log file is avilable from the '/kill/tensorboard_actor' and '/kill/tensorboard_learner' folder. 
+<img src="images/kill_train_result.png" width="400">
 
 # Select the bot skill level
 There are total 4 difficult level of bot. You can set it by changing level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
@@ -99,6 +100,14 @@ Because the goal of this game is captureing the flag, killing enemy is not inclu
 | return the picked up flag to my base | 2.0 |
 
 # Evaluting Result
+You can evaluate the trianed agent using below command.
+```
+e.g. $ python run_evaluation.py --exp_name [experiment name] --model_name [saved model name]
+e.g. $ python3.8 run_evaluation.py --exp_name kill --model_name model_8000
+```
+
+I also share the pretrained weight of my own through Google Drive. Please download from below links
+- Kill agent: https://drive.google.com/drive/folders/1bv9vxXrFJCfRLZTI42sV6SWJ4cA_rOX3?usp=sharing
 
 ## 'kill' environment
 
