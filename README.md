@@ -58,7 +58,7 @@ e.g $ sh map_copy_python.sh /home/kimbring2/.local/lib/python3.8/site-packages/d
 # How to customize map
 You can design your own map using program called GtkRadiant. I also make the ctf_simple map like a below image.
 
-<img src="image/gtk_radiant_sample.png" width="1000">
+<img src="images/gtk_radiant_sample.png" width="1000">
 
 For that, you need to install three program mentioned in https://github.com/deepmind/lab#upstream-sources. After that, open GtkRadiant. You just need to make a closed room and put essential component for Capture The Flag game sush as info_player_intermission, team_ctf_blueflag, team_ctf_redflag, team_ctf_blueplayer, team_ctf_redplayer, team_ctf_bluespawn and team_ctf_redspawn.
 
