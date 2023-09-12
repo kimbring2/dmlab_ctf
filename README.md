@@ -109,8 +109,7 @@ e.g. $ python3.8 run_evaluation.py --exp_name kill --model_name model_8000
 I also share the pretrained weight of my own through Google Drive. Please download from below links
 - Kill agent: https://drive.google.com/drive/folders/1bv9vxXrFJCfRLZTI42sV6SWJ4cA_rOX3?usp=sharing
 
-## 'kill' environment
-
+<img src="images/kill_agent_video.gif" width="600">
 
 # Reference
 1. DeepMind Lab: https://github.com/deepmind/lab
