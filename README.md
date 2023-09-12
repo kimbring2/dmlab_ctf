@@ -106,7 +106,7 @@ Because the goal of this game is captureing the flag, killing enemy is not inclu
 # Evaluting Result
 You can evaluate the trianed agent using below command.
 ```
-e.g. $ python run_evaluation.py --exp_name [experiment name] --model_name [saved model name]
+$ python run_evaluation.py --exp_name [experiment name] --model_name [saved model name]
 e.g. $ python3.8 run_evaluation.py --exp_name kill --model_name model_8000
 ```
 
