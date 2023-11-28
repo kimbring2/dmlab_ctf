@@ -3,6 +3,7 @@ from tensorflow.keras import layers
 from typing import Any, List, Sequence, Tuple
 import numpy as np
 
+
 def log_normal_pdf(sample, mean, logvar, raxis=1):
     log2pi = tf.math.log(2. * np.pi)
 

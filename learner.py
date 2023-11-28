@@ -23,10 +23,7 @@ import gym
 from parametric_distribution import get_parametric_distribution_for_action_space
 
 parser = argparse.ArgumentParser(description='CTF IMPALA Server')
-parser.add_argument('--exp_name', type=str, default="kill", help='name of experiment')
 parser.add_argument('--env_num', type=int, default=2, help='ID of environment')
-parser.add_argument('--batch_size', type=int, default=2, help='batch size of training')
-parser.add_argument('--unroll_length', type=int, default=50, help='unroll length of trajectory')
 parser.add_argument('--gpu_use', type=bool, default=False, help='use gpu')
 parser.add_argument('--pretrained_model', type=str, help='pretrained model name')
 arguments = parser.parse_args()
@@ -50,12 +47,12 @@ for i in range(0, arguments.env_num):
     socket_list.append(socket)
 
 
-num_actions = 7
+num_actions = 12
 screen_size = (64,64,3)    
 
-batch_size = arguments.batch_size
+batch_size = 32
 
-unroll_length = 50
+unroll_length = 250
 queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
                            shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*screen_size],[unroll_length+1,3],
                                    [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,128],[unroll_length+1,128]])
@@ -64,8 +61,8 @@ Unroll = collections.namedtuple('Unroll', 'env_id reward done obs_screen obs_inv
 num_hidden_units = 512
 model = network.ActorCritic(num_actions, num_hidden_units)
 
-print("Load Pretrained Model")
-model.load_weights("kill/model/" + "model_1000")
+#print("Load Pretrained Model")
+#model.load_weights("kill/model/" + "model_1000")
 
 num_action_repeats = 1
 total_environment_frames = int(4e7)
@@ -76,7 +73,7 @@ final_iteration = int(math.ceil(total_environment_frames / iter_frame_ratio))
 lr = tf.keras.optimizers.schedules.PolynomialDecay(0.0001, final_iteration, 0)
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
 
-writer = tf.summary.create_file_writer(arguments.exp_name + "/tensorboard_learner")
+writer = tf.summary.create_file_writer("tensorboard_learner")
 
 def take_vector_elements(vectors, indices):
     return tf.gather_nd(vectors, tf.stack([tf.range(tf.shape(vectors)[0]), indices], axis=1))
@@ -381,7 +378,7 @@ def Train_Thread(coord):
             writer.flush()
 
         if training_step % 1000 == 0:
-            model.save_weights(arguments.exp_name + '/' + 'model/model_' + str(training_step))
+            model.save_weights('model/model_' + str(training_step))
 
         if training_step == 100000000:
             coord.request_stop()

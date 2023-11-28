@@ -16,14 +16,13 @@ from absl import flags
 import deepmind_lab
 
 parser = argparse.ArgumentParser(description='CTF IMPALA Actor')
-parser.add_argument('--exp_name', type=str, default="kill", help='name of experiment')
 parser.add_argument('--env_id', type=int, default=0, help='ID of environment')
 arguments = parser.parse_args()
 
 env_id = arguments.env_id
 
 if env_id == 0:
-    writer = tf.summary.create_file_writer(arguments.exp_name + '/' + "tensorboard_actor")
+    writer = tf.summary.create_file_writer("tensorboard_actor")
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -37,7 +36,7 @@ socket.connect("tcp://localhost:" + str(6555 + arguments.env_id))
 # Create a new environment object.
 width = 320
 height = 320
-fps = 15
+fps = 30
 action_repeat = int(60 / fps)
 env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
                        {'fps': str(fps), 'width': str(width), 'height': str(height)})
@@ -49,61 +48,44 @@ def _action(*entries):
 
 
 ACTIONS = {
+      'noop': _action(0, 0, 0, 0, 0, 0, 0),
       'look_left': _action(-20, 0, 0, 0, 0, 0, 0),
       'look_right': _action(20, 0, 0, 0, 0, 0, 0),
+      'look_up': _action(0, 10, 0, 0, 0, 0, 0),
+      'look_down': _action(0, -10, 0, 0, 0, 0, 0),
       'strafe_left': _action(0, 0, -1, 0, 0, 0, 0),
       'strafe_right': _action(0, 0, 1, 0, 0, 0, 0),
       'forward': _action(0, 0, 0, 1, 0, 0, 0),
       'backward': _action(0, 0, 0, -1, 0, 0, 0),
       'fire': _action(0, 0, 0, 0, 1, 0, 0),
+      'jump': _action(0, 0, 0, 0, 0, 1, 0),
+      'crouch': _action(0, 0, 0, 0, 0, 0, 1)
   }
 
 
-if arguments.exp_name == 'kill':
-    REWARDS = {
-        'PICKUP_REWARD': 0,
-        'PICKUP_GOAL': 0,
-        'TARGET_SCORE': 0,
-        'TAG_SELF': 0,
-        'TAG_PLAYER': 0,
-        'TAG_PLAYER': 1,
-        'CTF_FLAG_BONUS': 0,
-        'CTF_CAPTURE_BONUS': 0,
-        'CTF_TEAM_BONUS': 0,
-        'CTF_FRAG_CARRIER_BONUS': 0,
-        'CTF_RECOVERY_BONUS': 0,
-        'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
-        'CTF_FLAG_DEFENSE_BONUS': 0,
-        'CTF_CARRIER_PROTECT_BONUS': 0,
-        'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
-        'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
-    }
-elif arguments.exp_name == 'flag':
-    REWARDS = {
-        'PICKUP_REWARD': 0,
-        'PICKUP_GOAL': 0,
-        'TARGET_SCORE': 0,
-        'TAG_SELF': 0,
-        'TAG_PLAYER': 0,
-        'TAG_PLAYER': 0,
-        'CTF_FLAG_BONUS': 0,
-        'CTF_CAPTURE_BONUS': 1,
-        'CTF_TEAM_BONUS': 0,
-        'CTF_FRAG_CARRIER_BONUS': 0,
-        'CTF_RECOVERY_BONUS': 0,
-        'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
-        'CTF_FLAG_DEFENSE_BONUS': 0,
-        'CTF_CARRIER_PROTECT_BONUS': 0,
-        'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
-        'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
-    }
-
+REWARDS = {
+    'PICKUP_REWARD': 0,
+    'PICKUP_GOAL': 0,
+    'TARGET_SCORE': 0,
+    'TAG_SELF': 0,
+    'TAG_PLAYER': 0.5,
+    'CTF_FLAG_BONUS': 1.0,
+    'CTF_CAPTURE_BONUS': 5.0,
+    'CTF_TEAM_BONUS': 0,
+    'CTF_FRAG_CARRIER_BONUS': 0,
+    'CTF_RECOVERY_BONUS': 0,
+    'CTF_CARRIER_DANGER_PROTECT_BONUS': 0,
+    'CTF_FLAG_DEFENSE_BONUS': 0,
+    'CTF_CARRIER_PROTECT_BONUS': 0,
+    'CTF_RETURN_FLAG_ASSIST_BONUS': 0,
+    'CTF_FRAG_CARRIER_ASSIST_BONUS': 0
+}
 
 
 ACTION_LIST = list(ACTIONS)
 #print("ACTION_LIST: ", ACTION_LIST)
 
-num_actions = 7
+num_actions = 12
 screen_size = (64,64,3)
 
 
@@ -115,10 +97,17 @@ def render(obs, name):
 def one_hot(a, num_classes):
     return np.squeeze(np.eye(num_classes)[a])
 
+episodes = []
 
 scores = []
-episodes = []
 average = []
+
+scores_side = []
+average_side = []
+
+scores_main = []
+average_main = []
+
 for episode_step in range(0, 2000000):
     env.reset(seed=arguments.env_id)
 
@@ -139,8 +128,16 @@ for episode_step in range(0, 2000000):
     state_inv = obs_inv
 
     done = False
+
     reward = 0.0
     reward_sum = 0
+
+    reward_side = 0.0
+    reward_side_sum = 0.0
+
+    reward_main = 0.0
+    reward_main_sum = 0.0
+
     step = 0
     while True:
         try:
@@ -158,6 +155,9 @@ for episode_step in range(0, 2000000):
             reward_game = env.step(ACTIONS[ACTION_LIST[action]], num_steps=action_repeat)
 
             reward = 0
+            reward_side = 0.0
+            reward_main = 0.0
+
             events = env.events()
             if len(events) != 0:
                 for event in events:
@@ -173,18 +173,29 @@ for episode_step in range(0, 2000000):
 
                         if team == 'blue':
                             reward = float(REWARDS[reason])
+                            if reason == 'TAG_PLAYER' or reason == 'CTF_FLAG_BONUS':
+                                reward_side = reward
+                            else:
+                                reward_main = reward
 
-                        print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
+                        #print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 
             done = not env.is_running()
-            if done or step == 500:
+            if done or step == 1000:
                 if env_id == 0:
-                    scores.append(reward_sum)
                     episodes.append(episode_step)
-                    average.append(sum(scores[-50:]) / len(scores[-50:]))
+
+                    #scores.append(reward_sum)
+                    scores_side.append(reward_side_sum)
+                    scores_main.append(reward_main_sum)
+
+                    #average.append(sum(scores[-50:]) / len(scores[-50:]))
+                    average_side.append(sum(scores_side[-50:]) / len(scores_side[-50:]))
+                    average_main.append(sum(scores_main[-50:]) / len(scores_main[-50:]))
 
                     with writer.as_default():
-                        tf.summary.scalar("average_reward", average[-1], step=episode_step)
+                        tf.summary.scalar("average_reward_side", average_side[-1], step=episode_step)
+                        tf.summary.scalar("average_reward_main", average_main[-1], step=episode_step)
                         writer.flush()
 
                     #print("average_reward: " + str(average[-1]))
@@ -213,7 +224,10 @@ for episode_step in range(0, 2000000):
             #if env_id == 0: 
             #    render(obs1_raw, "obs")
 
-            reward_sum += reward
+            #reward_sum += reward
+            reward_side_sum += reward_side
+            reward_main_sum += reward_main
+
             state_screen = next_state_screen
             state_inv = next_state_inv
 

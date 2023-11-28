@@ -21,10 +21,11 @@ map_name = "ctf_simple"
 # 'DEBUG.HAS_RED_FLAG'
 env = deepmind_lab.Lab(map_name, ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
                        {'fps': '60', 'width': str(width), 'height': str(height)})
-#env = deepmind_lab.Lab("contributed/dmlab30/lasertag_one_opponent_small", ['RGB_INTERLEAVED'],
-#                       {'fps': '30', 'width': '1280', 'height': '960'})
+#env = deepmind_lab.Lab("collect_apple", ['RGB_INTERLEAVED'], {'fps': '30', 'width': '640', 'height': '640'})
 #env = deepmind_lab.Lab("tests/update_inventory_test", ['RGB_INTERLEAVED', 'DEBUG.AMOUNT', 'DEBUG.GADGET'],
 #                       {'fps': '60', 'width': '640', 'height': '640'})
+#env = deepmind_lab.Lab(map_name, ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
+#                       {'fps': '60', 'width': str(width), 'height': str(height)})
 
 def _action(*entries):
   return np.array(entries, dtype=np.intc)
@@ -117,6 +118,7 @@ if __name__ == '__main__':
 		fps = 60
 		size = (720, 640)
 		video_out = cv2.VideoWriter(path_video, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+		reward_sum = 0
 		while True:
 			pygame.event.set_grab(True)
 
@@ -236,6 +238,8 @@ if __name__ == '__main__':
 							 jump,
 							 crouch)
 			reward_game = env.step(action, num_steps=1)
+			reward_sum += reward_game
+
 			#print("reward_game: ", reward_game)
 
 			reward = 0
@@ -258,10 +262,12 @@ if __name__ == '__main__':
 
 						print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 
-				print("")
+				#print("")
 
 			done = not env.is_running()
 			if done or step == 4000:
+				print("reward_sum: ", reward_sum)
+
 				print('Environment stopped early')
 				print("exit program")
 
@@ -277,30 +283,30 @@ if __name__ == '__main__':
 							 'action': action_list, 'reward': reward_list, 'done': done_list}
 
 				path_npy = save_path + save_file + '.npy'
-				np.save(path_npy, save_data)
+				#np.save(path_npy, save_data)
 
 				break
 
 			obs = env.observations()
-			print("obs.keys(): ", obs.keys())
+			#print("obs.keys(): ", obs.keys())
 
 			#cus_obs = env.custom_observations()
 
 			#print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
 			#obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
 			obs_screen = obs['RGB_INTERLEAVED']
-			obs_gadget_amount = obs['DEBUG.GADGET_AMOUNT']
-			obs_gadget = obs['DEBUG.GADGET']
-			obs_has_red_flag = obs['DEBUG.HAS_RED_FLAG']
+			#obs_gadget_amount = obs['DEBUG.GADGET_AMOUNT']
+			#obs_gadget = obs['DEBUG.GADGET']
+			#obs_has_red_flag = obs['DEBUG.HAS_RED_FLAG']
 
-			has_red_flag_onehot = one_hot(int(obs_has_red_flag), 2) 
+			#has_red_flag_onehot = one_hot(int(obs_has_red_flag), 2) 
 
-			print("obs_gadget_amount: ", obs_gadget_amount)
-			print("has_red_flag_onehot: ", has_red_flag_onehot)
+			#print("obs_gadget_amount: ", obs_gadget_amount)
+			#print("has_red_flag_onehot: ", has_red_flag_onehot)
 
-			obs_inv = np.concatenate([obs_gadget_amount / 100.0, has_red_flag_onehot])
-			print("obs_inv: ", obs_inv)
-			print("")
+			#obs_inv = np.concatenate([obs_gadget_amount / 100.0, has_red_flag_onehot])
+			#print("obs_inv: ", obs_inv)
+			#print("")
 
 			episode_list.append(episode)
 			step_list.append(step)
@@ -329,10 +335,8 @@ if __name__ == '__main__':
 			#pygame.mouse.set_pos([720 / 2, 640 / 2])
 			step += 1
 
-			print("step: ", step)
+			#print("step: ", step)
 
-			#for i in range(0, 1000):
-			#	tset = 2^5
 			#pygame.event.pump()
 			#pygame.time.delay(100)
 			clock.tick(60)
