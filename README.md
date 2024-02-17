@@ -7,6 +7,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 3. tensorflow-probability==0.12.0
 4. opencv-python==4.2.0.34
 5. numpy==1.21.0
+6. Bazel==6.4.0(sudo apt-get install gettext)
 
 # Demo video 
 ## 1. To make everything simple, Capture the Flag map is made for the 1 vs 1 game without any item and obstacle.
