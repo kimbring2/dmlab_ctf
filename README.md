@@ -69,6 +69,8 @@ You can design your own map using program called GtkRadiant. I also make the ctf
 
 For that, you need to install three program mentioned in https://github.com/deepmind/lab#upstream-sources. After that, open GtkRadiant. You just need to make a closed room and put essential component for Capture The Flag game sush as info_player_intermission, team_ctf_blueflag, team_ctf_redflag, team_ctf_blueplayer, team_ctf_redplayer, team_ctf_bluespawn and team_ctf_redspawn.
 
+After installing that packages, please download the map files from [baseq3](https://github.com/nrempel/q3-server/tree/master/baseq3). You need to copy that files under ```ioq3/build/release-linux-x86_64/baseq3```.
+
 If you finish designing map and make a map format file, you should convert it to binary format called the bsp, aas. The DeepMind also provides [tool for that](https://github.com/deepmind/lab/blob/master/deepmind/level_generation/compile_map.sh).
 
 Before runnthing that script, you need to modify the Q3MP, and BSPC path of that file according to your folder structrue. Below is example of my workspace.
