@@ -1,14 +1,15 @@
 # Introduction
 Implementation of [Capture the Flag: the emergence of complex cooperative agents](https://deepmind.com/blog/article/capture-the-flag-science) of the DeepMind. I first describe how to set the DeepMind lab for running the Capture The Flag map. Next, I also add a way how to desing your own simple CTF map. Finally, I am going to train the agent for Capture the Flag game in 1 vs 1 case. The scale of network will be little small than original paper. However, you can know a basic knowleade how to build the agent for CTF game.
 
-# Version
+# Dependencies
 1. Python 3.8
 2. tensorflow==2.8.4
 3. tensorflow-probability==0.12.0
 4. opencv-python==4.2.0.34
 5. numpy==1.21.0
 6. dm-env
-7. Bazel==6.4.0(sudo apt-get install gettext)
+7. pygame
+8. Bazel==6.4.0(sudo apt-get install gettext)
 
 # Demo video 
 ## 1. To make everything simple, Capture the Flag map is made for the 1 vs 1 game without any item and obstacle.
