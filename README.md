@@ -17,7 +17,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
-```
+```Python
 import deepmind_lab
 import numpy as np
 import cv2
