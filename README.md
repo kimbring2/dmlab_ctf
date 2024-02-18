@@ -28,8 +28,8 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 | look_right | _action(20, 0, 0, 0, 0, 0, 0) | |
 | look_up | _action(0, 10, 0, 0, 0, 0, 0) | |
 | look_down | _action(0, -10, 0, 0, 0, 0, 0) | |
-| strafe_left | _action(0, 0, -1, 0, 0, 0, 0) | |
-| strafe_right | _action(0, 0, 1, 0, 0, 0, 0) | |
+| strafe_left | _action(0, 0, -1, 0, 0, 0, 0) | Move left without changing the view angle |
+| strafe_right | _action(0, 0, 1, 0, 0, 0, 0) | Move right without changing the view angle |
 | forward | _action(0, 0, 0, 1, 0, 0, 0) | |
 | backward | _action(0, 0, 0, -1, 0, 0, 0) | |
 | fire | _action(0, 0, 0, 0, 1, 0, 0) | |
