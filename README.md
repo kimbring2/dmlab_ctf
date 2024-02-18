@@ -17,6 +17,48 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
+```
+import deepmind_lab
+import numpy as np
+import cv2
+import random
+
+env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED'], {'fps': '30', 'width': '640', 'height': '640'})
+env.reset(seed=1)
+
+def _action(*entries):
+  return np.array(entries, dtype=np.intc)
+
+ACTIONS = {
+      'look_left': _action(-20, 0, 0, 0, 0, 0, 0),
+      'look_right': _action(20, 0, 0, 0, 0, 0, 0),
+      'strafe_left': _action(0, 0, -1, 0, 0, 0, 0),
+      'strafe_right': _action(0, 0, 1, 0, 0, 0, 0),
+      'forward': _action(0, 0, 0, 1, 0, 0, 0),
+      'backward': _action(0, 0, 0, -1, 0, 0, 0),
+      'fire': _action(0, 0, 0, 0, 1, 0, 0),
+  }
+
+ACTION_LIST = list(ACTIONS)
+
+def render(obs):
+    obs = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
+    cv2.imshow('obs', obs)
+    cv2.waitKey(1)
+
+while True:
+    if not env.is_running() or step == 1000:
+        print('Environment stopped early')
+        break
+    
+    env.render()
+    obs = env.observations()
+    render(obs)
+       
+    action = random.choice(ACTION_LIST)
+    reward = env.step(ACTIONS[action], num_steps=2)
+```
+
 This environment only needs 7 actions because the map height is the same at every place.
 
 ## 2. Middle
@@ -26,12 +68,8 @@ This environment only needs 7 actions because the map height is the same at ever
 
 This environment only needs 7 actions because the map height is the same at every place.
 
-## Etc. There is also a map for the 3 vs 3 games that is provided by the DeepMind Lab
-[![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
- "Capture The Flag Implementation - Click to Watch!")
-<strong>Click to Watch!</strong>
+# State
 
-This environment needs 11 actions because there are many height changes during game playing.
 
 # Agent Network Architecture
 ## Kill model
@@ -110,21 +148,28 @@ There are a total of 4 difficult levels of bot. You can set it by changing the l
 <img src="images/set_bot_level.png" width="400">
 
 # Reward
-Because the goal of this game is captureing the flag, killing enemy is not included in reward.
+Because the goal of this game is capturing the flag, killing the enemy is not included in the reward.
 | Event  | Reward |
 | ------------- | ------------- |
-| pick up the enermy flag | 0.5 |
-| return the picked up flag to my base | 2.0 |
+| Pick up the enemy flag | 0.5 |
+| Return the picked-up flag to my base | 2.0 |
 
 # Evaluting Result
-You can evaluate the trianed agent using below command.
+You can evaluate the trained agent using the below command.
 ```
 $ python run_evaluation.py --exp_name [experiment name] --model_name [saved model name]
 e.g. $ python3.8 run_evaluation.py --exp_name kill --model_name model_8000
 ```
 
-I also share the pretrained weight of my own through Google Drive. Please download from below links
+I also share the pre-trained weight of my own through Google Drive. Please download from the below links
 - Kill agent: https://drive.google.com/drive/folders/1bv9vxXrFJCfRLZTI42sV6SWJ4cA_rOX3?usp=sharing
+
+## Etc. There is also a map for the 3 vs 3 games that is provided by the DeepMind Lab
+[![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
+ "Capture The Flag Implementation - Click to Watch!")
+<strong>Click to Watch!</strong>
+
+This environment needs 11 actions because there are many height changes during game playing.
 
 <img src="images/kill_agent_video.gif" width="600">
 
