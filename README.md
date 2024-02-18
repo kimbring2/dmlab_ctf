@@ -96,25 +96,25 @@ while True:
     action = random.choice(ACTION_LIST)
     reward_game = env.step(ACTIONS[action], num_steps=2)
     reward = 0
-			 events = env.events()
+    events = env.events()
 			
-			 if len(events) != 0:
-				    for event in events:
-					       if event[0] == 'reward':
-						      event_info = event[1]
+    if len(events) != 0:
+        for event in events:
+            if event[0] == 'reward':
+                event_info = event[1]
 
-						      reason = event_info[0]
-						      team = event_info[1]
-						      score = event_info[2]
-						      player_id = event_info[3]
-						      location = event_info[4]
-						      other_player_id = event_info[5]
+                reason = event_info[0]
+                team = event_info[1]
+                score = event_info[2]
+                player_id = event_info[3]
+                location = event_info[4]
+                other_player_id = event_info[5]
 
-						      if team == 'blue':
-                print("team == 'blue'")
-                reward = REWARDS[reason]
+                if team == 'blue':
+                    print("team == 'blue'")
+                    reward = REWARDS[reason]
 
-            print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
+                print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 ```
 
 This environment only needs 7 actions because the map height is the same at every place.
