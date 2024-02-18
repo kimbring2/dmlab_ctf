@@ -6,7 +6,7 @@ import random
 print("deepmind_lab.__file__: ", deepmind_lab.__file__)
 
 ## Create a new environment object.
-env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED'],
+env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
                        {'fps': '30', 'width': '640', 'height': '640'})
 
 #env = deepmind_lab.Lab("contributed/dmlab30/lasertag_one_opponent_small", ['RGB_INTERLEAVED'],
@@ -55,16 +55,23 @@ if __name__ == '__main__':
 
 		env.reset(seed=1)
 		obs = env.observations()
+		print("obs.keys(): ", obs.keys())
+		print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
+		print("obs['DEBUG.GADGET_AMOUNT'].shape: ", obs['DEBUG.GADGET_AMOUNT'].shape)
+		print("obs['DEBUG.GADGET'].shape: ", obs['DEBUG.GADGET'].shape)
+		print("obs['DEBUG.HAS_RED_FLAG'].shape: ", obs['DEBUG.HAS_RED_FLAG'].shape)
+
+
 		obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
 		obs = cv2.resize(obs_raw, dsize=(84,84), interpolation=cv2.INTER_AREA)
 
 		step = 0
 		while True:
-			print("step: ", step)
+			#print("step: ", step)
 
 			done = not env.is_running()
 			#print("done: ", done)
-			render(obs_raw)
+			#render(obs_raw)
 
 			if done:
 				print('Environment stopped early')
@@ -73,6 +80,12 @@ if __name__ == '__main__':
 			action = random.randint(0, len(ACTION_LIST) - 1)
 			reward = env.step(ACTIONS[ACTION_LIST[0]], num_steps=4)
 			obs = env.observations()
+
+			#print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
+			#print("obs['DEBUG.GADGET_AMOUNT']: ", obs['DEBUG.GADGET_AMOUNT'])
+			#print("obs['DEBUG.GADGET']: ", obs['DEBUG.GADGET'])
+			print("obs['DEBUG.HAS_RED_FLAG']: ", obs['DEBUG.HAS_RED_FLAG'])
+
 			#print("obs: ", obs)
 			#print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
 			obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
