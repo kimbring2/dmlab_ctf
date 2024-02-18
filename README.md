@@ -11,16 +11,22 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 7. pygame
 8. Bazel==6.4.0(sudo apt-get install gettext)
 
-# Demo video 
-## 1. To make everything simple, the Capture the Flag map is made for the 1 vs 1 game without any items and obstacles.
-
-[![1 vs 1 game demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
+# Maps 
+## 1. Simple
+[![Simple CTF map demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
 This environment only needs 7 actions because the map height is the same at every place.
 
-## 2. There is also a map for the 3 vs 3 games that is provided by the DeepMind Lab
+## 2. Middle
+[![Middle CTF map demo](https://i3.ytimg.com/vi/CfT4elqh0S4/hqdefault.jpg)](https://youtu.be/CfT4elqh0S4
+ "Capture The Flag Implementation - Click to Watch!")
+<strong>Click to Watch!</strong>
+
+This environment only needs 7 actions because the map height is the same at every place.
+
+## Etc. There is also a map for the 3 vs 3 games that is provided by the DeepMind Lab
 [![3 vs 3 game demo](https://img.youtube.com/vi/5UYPigIJl6s/hqdefault.jpg)](https://www.youtube.com/watch?v=5UYPigIJl6s
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
