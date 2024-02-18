@@ -11,7 +11,44 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 7. pygame
 8. Bazel==6.4.0(sudo apt-get install gettext)
 
-# Maps 
+# Environment Detail
+## 1. State
+| Name  | Shape | Description |
+| ------------- | ------------- | ------------- |
+| RGB_INTERLEAVED | (640, 640, 3) | Game Screen |
+| DEBUG.GADGET_AMOUNT | (1,) | Remaining Bullet Number |
+| DEBUG.GADGET | (1,) | Weapon Type |
+| DEBUG.HAS_RED_FLAG | (1,) | Whether or not the Player currently is holding the enemy flag |
+
+## 2. Action
+| Name  | value | Description |
+| ------------- | ------------- | ------------- |
+| noop | _action(0, 0, 0, 0, 0, 0, 0) | |
+| look_left | _action(-20, 0, 0, 0, 0, 0, 0) | |
+| look_right | _action(20, 0, 0, 0, 0, 0, 0) | |
+| look_up | _action(0, 10, 0, 0, 0, 0, 0) | |
+| look_down | _action(0, -10, 0, 0, 0, 0, 0) | |
+| strafe_left | _action(0, 0, -1, 0, 0, 0, 0) | |
+| strafe_right | _action(0, 0, 1, 0, 0, 0, 0) | |
+| forward | _action(0, 0, 0, 1, 0, 0, 0) | |
+| backward | _action(0, 0, 0, -1, 0, 0, 0) | |
+| fire | _action(0, 0, 0, 0, 1, 0, 0) | |
+| jump | _action(0, 0, 0, 0, 0, 1, 0) | |
+| crouch | _action(0, 0, 0, 0, 0, 0, 1) | |
+
+## 3. Game Event
+| Name | Description |
+| ------------- | ------------- |
+| reason | PICKUP_REWARD, PICKUP_GOAL, TARGET_SCORE, TAG_SELF, TAG_PLAYER, CTF_FLAG_BONUS, CTF_CAPTURE_BONUS, CTF_TEAM_BONUS, CTF_FRAG_CARRIER_BONUS, CTF_RECOVERY_BONUS, CTF_CARRIER_DANGER_PROTECT_BONUS, CTF_FLAG_DEFENSE_BONUS, CTF_CARRIER_PROTECT_BONUS, CTF_RETURN_FLAG_ASSIST_BONUS, CTF_FRAG_CARRIER_ASSIST_BONUS |
+| team | blue, red |
+| score | 0, 1 |
+| player_id | 1 |
+| location | x, y, and z position |
+| other_player_id | 2, 3, 4, 5, 6 |
+
+# Sample Code
+The player is always the Blue team.
+
 ## 1. Simple
 [![Simple CTF map demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
  "Capture The Flag Implementation - Click to Watch!")
@@ -23,7 +60,8 @@ import numpy as np
 import cv2
 import random
 
-env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED'], {'fps': '30', 'width': '640', 'height': '640'})
+env = deepmind_lab.Lab("ctf_simple", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
+                      {'fps': '30', 'width': '640', 'height': '640'})
 env.reset(seed=1)
 
 def _action(*entries):
@@ -56,7 +94,27 @@ while True:
     render(obs)
        
     action = random.choice(ACTION_LIST)
-    reward = env.step(ACTIONS[action], num_steps=2)
+    reward_game = env.step(ACTIONS[action], num_steps=2)
+    reward = 0
+			 events = env.events()
+			
+			 if len(events) != 0:
+				    for event in events:
+					       if event[0] == 'reward':
+						      event_info = event[1]
+
+						      reason = event_info[0]
+						      team = event_info[1]
+						      score = event_info[2]
+						      player_id = event_info[3]
+						      location = event_info[4]
+						      other_player_id = event_info[5]
+
+						      if team == 'blue':
+                print("team == 'blue'")
+                reward = REWARDS[reason]
+
+            print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 ```
 
 This environment only needs 7 actions because the map height is the same at every place.
@@ -66,10 +124,13 @@ This environment only needs 7 actions because the map height is the same at ever
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
+```Python
+import deepmind_lab
+env = deepmind_lab.Lab("ctf_middle", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
+                      {'fps': '30', 'width': '640', 'height': '640'})
+```
+
 This environment only needs 7 actions because the map height is the same at every place.
-
-# State
-
 
 # Agent Network Architecture
 ## Kill model
@@ -146,13 +207,6 @@ Tensorboard log file is available from the '/kill/tensorboard_actor' and '/kill/
 There are a total of 4 difficult levels of bot. You can set it by changing the level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
 
 <img src="images/set_bot_level.png" width="400">
-
-# Reward
-Because the goal of this game is capturing the flag, killing the enemy is not included in the reward.
-| Event  | Reward |
-| ------------- | ------------- |
-| Pick up the enemy flag | 0.5 |
-| Return the picked-up flag to my base | 2.0 |
 
 # Evaluting Result
 You can evaluate the trained agent using the below command.
