@@ -34,6 +34,7 @@ if arguments.gpu_use == True:
     print("if arguments.gpu_use == True")
     physical_devices = tf.config.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+    #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 else:
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -47,21 +48,37 @@ for i in range(0, arguments.env_num):
     socket_list.append(socket)
 
 
-num_actions = 12
-screen_size = (64,64,3)    
+def _action(*entries):
+    return np.array(entries, dtype=np.intc)
 
-batch_size = 32
 
-unroll_length = 250
+ACTION_LIST = []
+for look_horizontal in [-10, -60, 0, 10, 60]:
+    for look_vertical in [-5, 0, 5]:
+        for strafe_horizontal in [-1, 0, 1]:
+            for strafe_vertical in [-1, 0, 1]:
+                for fire in [0, 1]:
+                    for jump in [0, 1]:
+                        ACTION_LIST.append(_action(look_horizontal, look_vertical, strafe_horizontal, strafe_vertical, fire, jump, 0))
+
+
+
+#ACTION_LIST = list(ACTIONS)
+num_actions = len(ACTION_LIST)
+screen_size = (128, 128, 3)    
+
+batch_size = 64
+
+unroll_length = 50
 queue = tf.queue.FIFOQueue(1, dtypes=[tf.int32, tf.float32, tf.bool, tf.float32, tf.float32, tf.float32, tf.int32, tf.float32, tf.float32], 
                            shapes=[[unroll_length+1],[unroll_length+1],[unroll_length+1],[unroll_length+1,*screen_size],[unroll_length+1,3],
-                                   [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,128],[unroll_length+1,128]])
+                                   [unroll_length+1,num_actions],[unroll_length+1],[unroll_length+1,256],[unroll_length+1,256]])
 Unroll = collections.namedtuple('Unroll', 'env_id reward done obs_screen obs_inv policy action memory_state carry_state')
 
-num_hidden_units = 512
+num_hidden_units = 1024
 model = network.ActorCritic(num_actions, num_hidden_units)
 
-#print("Load Pretrained Model")
+print("Load Pretrained Model")
 #model.load_weights("kill/model/" + "model_1000")
 
 num_action_repeats = 1
@@ -70,7 +87,7 @@ total_environment_frames = int(4e7)
 iter_frame_ratio = (batch_size * unroll_length * num_action_repeats)
 final_iteration = int(math.ceil(total_environment_frames / iter_frame_ratio))
     
-lr = tf.keras.optimizers.schedules.PolynomialDecay(0.0001, final_iteration, 0)
+lr = tf.keras.optimizers.schedules.PolynomialDecay(0.0001, final_iteration, 0.000001)
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
 
 writer = tf.summary.create_file_writer("tensorboard_learner")
@@ -82,7 +99,7 @@ def take_vector_elements(vectors, indices):
 parametric_action_distribution = get_parametric_distribution_for_action_space(Discrete(num_actions))
 kl = tf.keras.losses.KLDivergence()
 
-def update(screen_states, inv_states, actions, agent_policies, rewards, dones, memory_states, carry_states):
+def update(screen_states, inv_states, actions, agent_policies, rewards, dones, memory_states, carry_states, train_rl=False):
     screen_states = tf.transpose(screen_states, perm=[1, 0, 2, 3, 4])
     inv_states = tf.transpose(inv_states, perm=[1, 0, 2])
     actions = tf.transpose(actions, perm=[1, 0])
@@ -196,7 +213,11 @@ def update(screen_states, inv_states, actions, agent_policies, rewards, dones, m
         cvae_loss = -tf.reduce_mean(cvae_losses)
 
         rl_loss = actor_loss + critic_loss + entropy_loss
-        total_loss = rl_loss + cvae_loss
+
+        if train_rl == True:
+            total_loss = rl_loss + cvae_loss
+        else:
+            total_loss = cvae_loss
 
     grads = tape.gradient(total_loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -232,14 +253,14 @@ def Data_Thread(coord, i):
     policies = np.zeros((unroll_length + 1, num_actions), dtype=np.float32)
     rewards = np.zeros((unroll_length + 1), dtype=np.float32)
     dones = np.zeros((unroll_length + 1), dtype=np.bool)
-    memory_states = np.zeros((unroll_length + 1, 128), dtype=np.float32)
-    carry_states = np.zeros((unroll_length + 1, 128), dtype=np.float32)
+    memory_states = np.zeros((unroll_length + 1, 256), dtype=np.float32)
+    carry_states = np.zeros((unroll_length + 1, 256), dtype=np.float32)
 
     memory_index = 0
 
     index = 0
-    memory_state = np.zeros([1,128], dtype=np.float32)
-    carry_state = np.zeros([1,128], dtype=np.float32)
+    memory_state = np.zeros([1,256], dtype=np.float32)
+    carry_state = np.zeros([1,256], dtype=np.float32)
     min_elapsed_time = 5.0
 
     reward_list = []
@@ -291,7 +312,7 @@ def Data_Thread(coord, i):
 
         memory_index += 1
         index += 1
-        if index % 2000 == 0:
+        if index % 1000 == 0:
             average_reward = sum(reward_list[-50:]) / len(reward_list[-50:])
             #print("state.numpy().shape: ", state.numpy().shape)
             mean, logvar = model.CVAE.encode(screen_state)
@@ -346,7 +367,7 @@ it = iter(dataset)
 
 
 @tf.function
-def minimize(iterator):
+def minimize(iterator, train_rl=False):
     dequeue_data = next(iterator)
 
     # env_id reward done obs_screen obs_inv policy action memory_state carry_state
@@ -359,7 +380,7 @@ def minimize(iterator):
     # memory_states: 7
     # carry_states: 8
     rl_loss, cvae_loss = update(dequeue_data[3], dequeue_data[4], dequeue_data[6], dequeue_data[5], dequeue_data[1], 
-                                dequeue_data[2], dequeue_data[7], dequeue_data[8])
+                                dequeue_data[2], dequeue_data[7], dequeue_data[8], train_rl)
 
     return (rl_loss, cvae_loss)
 
@@ -370,8 +391,17 @@ def Train_Thread(coord):
     while not coord.should_stop():
         #print("training_step: ", training_step)
 
-        rl_loss, cvae_loss = minimize(it)
+        '''
+        if training_step <= 50000:
+            rl_loss, cvae_loss = minimize(it, False)
+            with writer.as_default():
+                #tf.summary.scalar("rl_loss", rl_loss, step=training_step)
+                tf.summary.scalar("cvae_loss", cvae_loss, step=training_step)
+                writer.flush()
+        else:
+        '''
 
+        rl_loss, cvae_loss = minimize(it, True)
         with writer.as_default():
             tf.summary.scalar("rl_loss", rl_loss, step=training_step)
             tf.summary.scalar("cvae_loss", cvae_loss, step=training_step)

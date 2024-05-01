@@ -12,40 +12,26 @@ width = 640
 height = 640
 
 gameDisplay = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Platypus")
+pygame.display.set_caption("Platyp us")
 pygame.mouse.set_visible(False)
 
-map_name = "ctf_middle"
+map_name = "ctf_simple"
 
 # Create a new environment object.
 # 'DEBUG.HAS_RED_FLAG'
+
+fps = 60
+action_repeat = int(60 / fps)
+
 env = deepmind_lab.Lab(map_name, ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 'DEBUG.GADGET', 'DEBUG.HAS_RED_FLAG'],
-                       {'fps': '60', 'width': str(width), 'height': str(height)})
-#env = deepmind_lab.Lab("contributed/dmlab30/lasertag_one_opponent_small", ['RGB_INTERLEAVED'],
+                           {'fps': str(fps), 'width': str(width), 'height': str(height)})
+#env = deepmind_lab.Lab("contributed/dmlab30/explore_goal_locations_small", ['RGB_INTERLEAVED'],
 #                       {'fps': '30', 'width': '1280', 'height': '960'})
 #env = deepmind_lab.Lab("tests/update_inventory_test", ['RGB_INTERLEAVED', 'DEBUG.AMOUNT', 'DEBUG.GADGET'],
 #                       {'fps': '60', 'width': '640', 'height': '640'})
 
 def _action(*entries):
   return np.array(entries, dtype=np.intc)
-
-ACTIONS = {
-      'noop': _action(0, 0, 0, 0, 0, 0, 0),
-      'look_left': _action(-20, 0, 0, 0, 0, 0, 0),
-      'look_right': _action(20, 0, 0, 0, 0, 0, 0),
-      'look_up': _action(0, 10, 0, 0, 0, 0, 0),
-      'look_down': _action(0, -10, 0, 0, 0, 0, 0),
-      'strafe_left': _action(0, 0, -1, 0, 0, 0, 0),
-      'strafe_right': _action(0, 0, 1, 0, 0, 0, 0),
-      'forward': _action(0, 0, 0, 1, 0, 0, 0),
-      'backward': _action(0, 0, 0, -1, 0, 0, 0),
-      'fire': _action(0, 0, 0, 0, 1, 0, 0),
-      'jump': _action(0, 0, 0, 0, 0, 1, 0),
-      'crouch': _action(0, 0, 0, 0, 0, 0, 1)
-  }
-
-ACTION_LIST = list(ACTIONS)
-print("ACTION_LIST: ", ACTION_LIST)
 
 REWARDS = {
 	'PICKUP_REWARD': 0,
@@ -54,7 +40,7 @@ REWARDS = {
 	'TAG_SELF': 0,
 	'TAG_PLAYER': 0,
 	'CTF_FLAG_BONUS': 1,
-	'CTF_CAPTURE_BONUS': 1,
+	'CTF_CAPTURE_BONUS': 0,
 	'CTF_TEAM_BONUS': 0,
 	'CTF_FRAG_CARRIER_BONUS': 0,
 	'CTF_RECOVERY_BONUS': 0,
@@ -82,11 +68,7 @@ def one_hot(a, num_classes):
 
 if __name__ == '__main__':
 	num_states = (80, 60)
-	num_actions = len(ACTION_LIST)
-
 	print("num_states: ", num_states)
-	print("num_actions: ", num_actions)
-
 	for episode in range(1000):
 		print("episode: ", episode)
 
@@ -114,10 +96,11 @@ if __name__ == '__main__':
 		save_file = dt_string
 		#save_file = 'test'
 		path_video = save_path + map_name + '_' + save_file + '.avi'
-		fps = 60
 		size = (720, 640)
 		video_out = cv2.VideoWriter(path_video, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
 		while True:
+			#print("step: ", step)
+
 			pygame.event.set_grab(True)
 
 			exit = False
@@ -165,23 +148,18 @@ if __name__ == '__main__':
 
 			keys = pygame.key.get_pressed()
 			if keys[pygame.K_w]:
-				#print("w")
 				keyboard_move[0] = 1
 
 			if keys[pygame.K_a]:
-				#print("a")
 				keyboard_move[1] = 1
 
 			if keys[pygame.K_s]:
-				#print("s")
 				keyboard_move[2] = 1
 
 			if keys[pygame.K_d]:
-				#print("d")
 				keyboard_move[3] = 1
 
 			if keys[pygame.K_z]:
-				#print("d")
 				crouch = 1
 				
 			if exit:
@@ -196,7 +174,7 @@ if __name__ == '__main__':
 				video_out.release()
 
 				save_data = {'episode': episode, 'step': step_list,
-							 'action': action_list, 'reward': reward_list, 'done': done_list}
+							   'action': action_list, 'reward': reward_list, 'done': done_list}
 
 				path_npy = save_path + save_file + '.npy'
 				#np.save(path_npy, save_data)
@@ -228,14 +206,9 @@ if __name__ == '__main__':
 			elif keyboard_move[3] == 1:
 				action_strafe_horizontal = 1
 
-			action = _action(action_look_horizontal, 
-							 action_look_vertical, 
-							 action_strafe_horizontal, 
-							 action_forward_backward, 
-							 weapon_fire, 
-							 jump,
-							 crouch)
-			reward_game = env.step(action, num_steps=1)
+			action = _action(action_look_horizontal, action_look_vertical,  action_strafe_horizontal, action_forward_backward, 
+							 	weapon_fire, jump, crouch)
+			reward_game = env.step(action, num_steps=action_repeat)
 			#print("reward_game: ", reward_game)
 
 			reward = 0
@@ -254,23 +227,26 @@ if __name__ == '__main__':
 						location = event_info[4]
 						other_player_id = event_info[5]
 
-						print("reason: ", reason)
-						print("team: ", team)
-						print("score: ", score)
-						print("player_id: ", player_id)
-						print("location: ", location)
-						print("other_player_id: ", other_player_id)
+						#print("reason: ", reason)
+						#print("team: ", team)
+						#print("score: ", score)
+						#print("player_id: ", player_id)
+						#print("location: ", location)
+						#print("other_player_id: ", other_player_id)
 
 						if team == 'blue':
-							print("team == 'blue'")
+							#print("team == 'blue'")
 							reward = REWARDS[reason]
 
 						print("reason: {0}, team: {1}, score: {2}, reward: {3}".format(reason, team, score, reward))
 
 				print("")
 
+			if reward != 0:
+				print("reward: ", reward)
+
 			done = not env.is_running()
-			if done or step == 4000:
+			if done or step == 2000:
 				print('Environment stopped early')
 				print("exit program")
 
@@ -283,7 +259,7 @@ if __name__ == '__main__':
 				video_out.release()
 
 				save_data = {'episode': episode, 'step': step_list,
-							 'action': action_list, 'reward': reward_list, 'done': done_list}
+							   'action': action_list, 'reward': reward_list, 'done': done_list}
 
 				path_npy = save_path + save_file + '.npy'
 				np.save(path_npy, save_data)
@@ -298,17 +274,17 @@ if __name__ == '__main__':
 			#print("obs['RGB_INTERLEAVED'].shape: ", obs['RGB_INTERLEAVED'].shape)
 			#obs_raw = cv2.cvtColor(obs['RGB_INTERLEAVED'], cv2.COLOR_BGR2RGB)
 			obs_screen = obs['RGB_INTERLEAVED']
-			obs_gadget_amount = obs['DEBUG.GADGET_AMOUNT']
-			obs_gadget = obs['DEBUG.GADGET']
-			obs_has_red_flag = obs['DEBUG.HAS_RED_FLAG']
+			#obs_gadget_amount = obs['DEBUG.GADGET_AMOUNT']
+			#obs_gadget = obs['DEBUG.GADGET']
+			#obs_has_red_flag = obs['DEBUG.HAS_RED_FLAG']
 			#print("obs_has_red_flag: ", obs_has_red_flag)
 
-			has_red_flag_onehot = one_hot(int(obs_has_red_flag), 2) 
+			#has_red_flag_onehot = one_hot(int(obs_has_red_flag), 2) 
 
 			#print("obs_gadget_amount: ", obs_gadget_amount)
 			#print("has_red_flag_onehot: ", has_red_flag_onehot)
 
-			obs_inv = np.concatenate([obs_gadget_amount / 100.0, has_red_flag_onehot])
+			#obs_inv = np.concatenate([obs_gadget_amount / 100.0, has_red_flag_onehot])
 			#print("obs_inv: ", obs_inv)
 			#print("")
 
@@ -338,11 +314,8 @@ if __name__ == '__main__':
 
 			#pygame.mouse.set_pos([720 / 2, 640 / 2])
 			step += 1
-
 			#print("step: ", step)
 
-			#for i in range(0, 1000):
-			#	tset = 2^5
 			#pygame.event.pump()
 			#pygame.time.delay(100)
 			clock.tick(60)
