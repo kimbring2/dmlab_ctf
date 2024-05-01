@@ -133,7 +133,10 @@ env = deepmind_lab.Lab("ctf_middle", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 
 This environment only needs 7 actions because the map height is the same at every place.
 
 # Agent Network Architecture
-## Kill model
+Like a setting of [Deepmind CTF paper](https://arxiv.org/abs/1807.01281), 
+<img src="images/deepmind_paper_env_info" width="700">
+
+Same state and action size are used in this project.
 <img src="images/ctf_network_base.png" width="700">
 
 # Setting
@@ -192,7 +195,7 @@ In my case, I use the command 'sudo ./compile_map.sh -a /home/kimbring2/GtkRadia
 # Lua script
 You also need to prepare a Lua script for running a map file with DmLab. Tutorial for that can be found at [minimal_level_tutorial](https://github.com/deepmind/lab/blob/master/docs/developers/minimal_level_tutorial.md). The only important thing is setting the game type as CAPTURE_THE_FLAG.
 
-# Training agents to kill the enemy
+# Training result
 You can train the agent using the below command. The experiment name should be one of 'kill', or 'flag'. The 'kill' environment gives a reward when the agent kills the enemy agent. Otherwise, the agent can obtain the reward when it grabs the enemy team flag and brings it back to the home team base in the 'flag' environment
 
 ```
@@ -201,7 +204,9 @@ e.g. $ ./run_reinforcement_learning.sh 64 True 64 50 kill
 ```
 
 Tensorboard log file is available from the '/kill/tensorboard_actor' and '/kill/tensorboard_learner' folder. 
-<img src="images/kill_train_result.png" width="700">
+
+## Simple map - kill the enemy
+<img src="images/simple_kill_train_result.png" width="700">
 
 # Select the bot skill level
 There are a total of 4 difficult levels of bot. You can set it by changing the level parameter of [ctf_simple.lua](https://github.com/kimbring2/dmlab_ctf/blob/main/ctf_simple.lua).
