@@ -134,7 +134,7 @@ This environment only needs 7 actions because the map height is the same at ever
 
 # Agent Network Architecture
 Like a setting of [Deepmind CTF paper](https://arxiv.org/abs/1807.01281), 
-<img src="images/deepmind_paper_env_info" width="700">
+<img src="images/deepmind_paper_env_info.png" width="700">
 
 Same state and action size are used in this project.
 <img src="images/ctf_network_base.png" width="700">
