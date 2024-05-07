@@ -199,8 +199,8 @@ You also need to prepare a Lua script for running a map file with DmLab. Tutoria
 You can train the agent using the below command. The experiment name should be one of 'kill', or 'flag'. The 'kill' environment gives a reward when the agent kills the enemy agent. Otherwise, the agent can obtain the reward when it grabs the enemy team flag and brings it back to the home team base in the 'flag' environment
 
 ```
-$ ./run_reinforcement_learning.sh [number of envs] [gpu use] [batch size] [unroll length] [experiment name]
-e.g. $ ./run_reinforcement_learning.sh 64 True 64 50 kill
+$ ./run_reinforcement_learning.sh [number of envs] [gpu use]
+e.g. $ ./run_reinforcement_learning.sh 64 True
 ```
 
 Tensorboard log file is available from the '/kill/tensorboard_actor' and '/kill/tensorboard_learner' folder. 
