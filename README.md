@@ -217,7 +217,7 @@ There are a total of 4 difficult levels of bot. You can set it by changing the l
 You can evaluate the trained agent using the below command.
 ```
 $ python run_evaluation.py --exp_name [experiment name] --model_name [saved model name]
-e.g. $ python3.8 run_evaluation.py --exp_name kill --model_name model_8000
+e.g. $ python run_evaluation.py --exp_name kill --model_name model_8000
 ```
 
 I also share the pre-trained weight of my own through Google Drive. Please download from the below links
