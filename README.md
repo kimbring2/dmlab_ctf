@@ -50,6 +50,8 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 The player is always the Blue team.
 
 ## 1. Simple
+An agent can see each other without exploration, 1 vs 1 same as a simple map, default weapon
+
 [![Simple CTF map demo](https://img.youtube.com/vi/88dNnX357eY/hqdefault.jpg)](https://youtu.be/88dNnX357eY
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
@@ -120,6 +122,8 @@ while True:
 This environment only needs 7 actions because the map height is the same at every place.
 
 ## 2. Middle
+An agent need to explore the map to find out each other, 1 vs 1 same as simple map, default weapon
+
 [![Middle CTF map demo](https://i3.ytimg.com/vi/CfT4elqh0S4/hqdefault.jpg)](https://youtu.be/CfT4elqh0S4
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
@@ -132,11 +136,17 @@ env = deepmind_lab.Lab("ctf_middle", ['RGB_INTERLEAVED', 'DEBUG.GADGET_AMOUNT', 
 
 This environment only needs 7 actions because the map height is the same at every place.
 
+## 3. Large
+An agent needs to explore the map to find out each other, 3 bots are added to previous maps for 2 vs 2, powerful beam-type weapon to default weapon
+[![Large CTF map demo](https://img.youtube.com/vi/vuOU7qoHmSU/maxresdefault.jpg)](https://www.youtube.com/watch?v=vuOU7qoHmSU
+ "Capture The Flag Implementation - Click to Watch!")
+<strong>Click to Watch!</strong>
+
 # Agent Network Architecture
 Like a setting of [Deepmind CTF paper](https://arxiv.org/abs/1807.01281), 
 <img src="images/deepmind_paper_env_info.png" width="700">
 
-Same state and action size are used in this project.
+The same state and action size are used in this project.
 <img src="images/ctf_network_base.png" width="700">
 
 # Setting
