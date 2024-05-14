@@ -138,7 +138,7 @@ This environment only needs 7 actions because the map height is the same at ever
 
 ## 3. Large
 An agent needs to explore the map to find out each other, 3 bots are added to previous maps for 2 vs 2, powerful beam-type weapon to default weapon
-[![Large CTF map demo](https://img.youtube.com/vi/vuOU7qoHmSU/maxresdefault.jpg)](https://www.youtube.com/watch?v=vuOU7qoHmSU
+[![Large CTF map demo](https://img.youtube.com/vi/vuOU7qoHmSU/sddefault.jpg)](https://www.youtube.com/watch?v=vuOU7qoHmSU
  "Capture The Flag Implementation - Click to Watch!")
 <strong>Click to Watch!</strong>
 
