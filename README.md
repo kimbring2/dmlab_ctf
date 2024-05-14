@@ -39,7 +39,7 @@ Implementation of [Capture the Flag: the emergence of complex cooperative agents
 ## 3. Game Event
 | Name | Description |
 | ------------- | ------------- |
-| reason | PICKUP_REWARD, PICKUP_GOAL, TARGET_SCORE, TAG_SELF, TAG_PLAYER, CTF_FLAG_BONUS, CTF_CAPTURE_BONUS, CTF_TEAM_BONUS, CTF_FRAG_CARRIER_BONUS, CTF_RECOVERY_BONUS, CTF_CARRIER_DANGER_PROTECT_BONUS, CTF_FLAG_DEFENSE_BONUS, CTF_CARRIER_PROTECT_BONUS, CTF_RETURN_FLAG_ASSIST_BONUS, CTF_FRAG_CARRIER_ASSIST_BONUS |
+| reason | TAG_PLAYER, CTF_FLAG_BONUS |
 | team | blue, red |
 | score | 0, 1 |
 | player_id | 1 |
